@@ -32,11 +32,12 @@ PORT=5000 node server.js
 | `GET /health` | Health check |
 | `GET /api/status` | Server status & uptime |
 | `GET /api/metrics` | Live CPU, memory, process metrics |
-| `GET /api/tools` | Tool manifest (26 tools) |
+| `GET /api/tools` | Tool manifest (40 tools) |
 | `POST /api/tools/execute` | Execute any MCP tool |
+| `GET /api/security/scan` | Automated security scan (audit + ports + sensitive files) |
 | `GET /favicon.ico` | Suppressed (204) |
 
-## MCP Tools (26 total)
+## MCP Tools (40 total)
 
 ### Git (4)
 - `git_status` — Repository status
@@ -76,20 +77,41 @@ PORT=5000 node server.js
 ### Environment (1)
 - `env_list` — List environment variables with optional name filter
 
-## Dashboard Panels (12 panels + 1 full-width analytics)
+### Security (7)
+- `security_audit` — Comprehensive automated security audit (ports, permissions, secrets, CVEs, git history)
+- `http_headers_check` — Analyze HTTP security headers (CSP, HSTS, X-Frame-Options, etc.) with scoring
+- `ssl_check` — Check SSL certificate details, issuer, expiry countdown, SHA256 fingerprint
+- `scan_sensitive_files` — Scan for .env, *.key, *.pem, credentials, high-entropy token patterns
+- `git_secrets_scan` — Search git commit history for leaked passwords, API keys, tokens
+- `cve_check` — Full CVE/vulnerability report via npm audit JSON with severity breakdown
+- `open_ports` — List open/listening ports by parsing `/proc/net/tcp` (no netstat required)
+
+### Forensics (8)
+- `file_checksum` — Compute MD5, SHA1, SHA256, SHA512 checksums + file size and timestamps
+- `file_strings` — Extract printable strings from any binary file (min-length configurable)
+- `file_hexdump` — Hex dump using `od` (configurable byte count)
+- `file_type` — Detect file type via magic bytes using `file` command
+- `recent_files` — Timeline of recently modified files (configurable days, excludes node_modules/.git)
+- `network_connections` — All TCP connections grouped by state (LISTEN, ESTABLISHED, TIME_WAIT…)
+- `process_forensics` — Deep process inspection via `/proc`: cmdline, status, FD count, memory map, env
+- `log_tail` — Tail any log file with optional keyword filter
+
+## Dashboard Panels (14 panels + 1 full-width analytics)
 1. **Git Operations** — status, log, diff, branch, stash, remotes, blame
 2. **File System** — browse, read, write, create dir, copy, move, delete, file stats, find, tree, disk usage
 3. **System Operations** — run command, list processes, kill process, env vars, network info, ports
 4. **Data Processing** — parse/format JSON, base64 encode/decode, UUID, hash, timestamp, text stats, search
-5. **Runtime Environment** *(new)* — Node info, npm list/audit/update, CPU load, disk, memory, package.json, run script
-6. **API & Endpoints** *(new)* — Live endpoint tiles, health check, custom HTTP request, live metrics
+5. **Runtime Environment** — Node info, npm list/audit/update, CPU load, disk, memory, package.json, run script
+6. **API & Endpoints** — Live endpoint tiles, health check, custom HTTP request, live metrics
 7. **Quick Actions** — File open, command history, keyboard shortcuts display
 8. **Network** — ping, curl, DNS lookup, network interfaces, route table, download, public IP
 9. **NPM/Node** — install, update, audit, outdated, run script, global packages, cache clear, eval
-10. **HTTP Client** *(new)* — GET/POST/PUT/DELETE/PATCH, ping server, fetch metrics, cURL, download, DNS, ping, public IP
-11. **Environment Variables** *(new)* — list all, search, filter by NODE/PATH/REPLIT, read .env, count
-12. **Ship's Status** — Real-time system stats (platform, CPUs, memory, uptime, hostname)
-13. **Real-Time Analytics** *(full-width)* — Live CPU/memory charts (blended real + animated), gauges, heatmap, sparklines, activity feed — now pulling real data from `/api/metrics` every 5s
+10. **HTTP Client** — GET/POST/PUT/DELETE/PATCH, ping server, fetch metrics, cURL, download, DNS, ping, public IP
+11. **Environment Variables** — list all, search, filter by NODE/PATH/REPLIT, read .env, count
+12. **Security Testing** *(new)* — Full audit, quick scan API, HTTP headers analysis, SSL check, sensitive file scan, git secrets hunt, CVE check, open ports, world-writable/SUID detection
+13. **Digital Forensics** *(new)* — File checksums, string extraction, hex dump, file type detection, recent file timeline, process forensics, network connections, log tailing, process tree, OS fingerprint
+14. **Ship's Status** — Real-time system stats (platform, CPUs, memory, uptime, hostname)
+15. **Real-Time Analytics** *(full-width)* — Live CPU/memory charts (blended real + animated), gauges, heatmap, sparklines, activity feed from `/api/metrics` every 5s
 
 ## Output Console (right pane)
 - Sticky split-pane layout: 65% left (scrollable panels), 35% right (sticky console)

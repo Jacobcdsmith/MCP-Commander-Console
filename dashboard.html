@@ -272,6 +272,73 @@
             opacity: 0.8;
         }
 
+        /* Security & Forensics panel variants */
+        .lcars-security-panel {
+            border-color: #ff4444;
+            background: linear-gradient(135deg, #1a0000 0%, rgba(40,0,0,0.95) 100%);
+        }
+        .lcars-security-panel::before {
+            background: linear-gradient(90deg, #ff4444 0%, #ff8800 33%, #ff4444 66%, #cc0000 100%);
+        }
+        .lcars-security-panel::after {
+            background: #ff4444;
+        }
+        .lcars-security-panel:hover {
+            box-shadow: 0 20px 40px rgba(255,0,0,0.2), 0 0 50px #ff4444;
+            border-color: #ff8800;
+        }
+        .lcars-security-panel .lcars-panel-header {
+            border-bottom-color: #ff4444;
+        }
+        .lcars-security-panel .lcars-icon {
+            fill: #ff6666;
+            filter: drop-shadow(0 0 10px #ff4444);
+        }
+        .lcars-security-panel .lcars-panel-header h2 {
+            color: #ff6666;
+        }
+        .sec-btn {
+            border-color: rgba(255, 68, 68, 0.3) !important;
+        }
+        .sec-btn:hover {
+            border-color: #ff4444 !important;
+            background: rgba(255, 68, 68, 0.15) !important;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4) !important;
+        }
+
+        .lcars-forensics-panel {
+            border-color: #aa44ff;
+            background: linear-gradient(135deg, #0d0018 0%, rgba(20,0,40,0.95) 100%);
+        }
+        .lcars-forensics-panel::before {
+            background: linear-gradient(90deg, #aa44ff 0%, #6622cc 33%, #dd66ff 66%, #aa44ff 100%);
+        }
+        .lcars-forensics-panel::after {
+            background: #aa44ff;
+        }
+        .lcars-forensics-panel:hover {
+            box-shadow: 0 20px 40px rgba(170,68,255,0.2), 0 0 50px #aa44ff;
+            border-color: #dd66ff;
+        }
+        .lcars-forensics-panel .lcars-panel-header {
+            border-bottom-color: #aa44ff;
+        }
+        .lcars-forensics-panel .lcars-icon {
+            fill: #cc88ff;
+            filter: drop-shadow(0 0 10px #aa44ff);
+        }
+        .lcars-forensics-panel .lcars-panel-header h2 {
+            color: #cc88ff;
+        }
+        .for-btn {
+            border-color: rgba(170, 68, 255, 0.3) !important;
+        }
+        .for-btn:hover {
+            border-color: #aa44ff !important;
+            background: rgba(170, 68, 255, 0.15) !important;
+            box-shadow: 0 0 15px rgba(170, 68, 255, 0.4) !important;
+        }
+
         .lcars-panel-header {
             display: flex;
             align-items: center;
@@ -2169,6 +2236,130 @@
                         <div class="lcars-button" onclick="executeCommand('run_command', {command: 'printenv | wc -l && echo \"total env vars\"'})">
                             <div class="tool-name">🔢 Count Variables</div>
                             <div class="tool-description">Total env variable count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECURITY TESTING PANEL -->
+            <div class="lcars-panel lcars-security-panel">
+                <div class="lcars-panel-header">
+                    <svg class="lcars-icon" viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12V11c0 4.52-3.03 8.75-7 9.93C8.03 19.75 5 15.52 5 11V6.3l7-3.12zM11 7v2h2V7h-2zm0 4v6h2v-6h-2z"/>
+                    </svg>
+                    <h2>Security Testing</h2>
+                </div>
+                <div class="lcars-panel-body">
+                    <div class="lcars-tools-grid">
+                        <div class="lcars-button sec-btn" onclick="executeCommand('security_audit', {directory: '.'})">
+                            <div class="tool-name">🛡️ Full Security Audit</div>
+                            <div class="tool-description">Ports, permissions, secrets, CVEs</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="runQuickSecurityScan()">
+                            <div class="tool-name">⚡ Quick Scan (API)</div>
+                            <div class="tool-description">Automated /api/security/scan endpoint</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="promptHttpHeadersCheck()">
+                            <div class="tool-name">🔍 HTTP Headers Check</div>
+                            <div class="tool-description">Analyze security headers of any URL</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="checkOwnHeaders()">
+                            <div class="tool-name">🏠 Check This Server</div>
+                            <div class="tool-description">Audit headers on localhost:5000</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="promptSslCheck()">
+                            <div class="tool-name">🔒 SSL Certificate</div>
+                            <div class="tool-description">Check cert expiry, issuer, fingerprint</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('scan_sensitive_files', {directory: '.'})">
+                            <div class="tool-name">🔑 Sensitive File Scan</div>
+                            <div class="tool-description">Find .env, *.key, *.pem, credentials</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('git_secrets_scan', {})">
+                            <div class="tool-name">🔐 Git Secrets Scan</div>
+                            <div class="tool-description">Hunt secrets in git commit history</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('cve_check', {})">
+                            <div class="tool-name">🐛 CVE Check</div>
+                            <div class="tool-description">npm vulnerabilities with CVE details</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('open_ports', {})">
+                            <div class="tool-name">🔌 Open Ports</div>
+                            <div class="tool-description">Listening ports from /proc/net/tcp</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('network_connections', {})">
+                            <div class="tool-name">🌐 Network Connections</div>
+                            <div class="tool-description">All TCP connections by state</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('run_command', {command: 'find . -maxdepth 4 -perm /o+w -type f 2>/dev/null | grep -v node_modules | head -20 || echo \"None found\"'})">
+                            <div class="tool-name">📂 World-Writable Files</div>
+                            <div class="tool-description">Check for over-permissive files</div>
+                        </div>
+                        <div class="lcars-button sec-btn" onclick="executeCommand('run_command', {command: 'find / -maxdepth 5 -perm /4000 -type f 2>/dev/null | head -20 || echo \"None found\"'})">
+                            <div class="tool-name">⚙️ SUID/SGID Files</div>
+                            <div class="tool-description">Privileged binary detection</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIGITAL FORENSICS PANEL -->
+            <div class="lcars-panel lcars-forensics-panel">
+                <div class="lcars-panel-header">
+                    <svg class="lcars-icon" viewBox="0 0 24 24">
+                        <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5zM8 7h3v1.5h-1v3H8.5v-3H8V7z"/>
+                    </svg>
+                    <h2>Digital Forensics</h2>
+                </div>
+                <div class="lcars-panel-body">
+                    <div class="lcars-tools-grid">
+                        <div class="lcars-button for-btn" onclick="promptFileChecksum()">
+                            <div class="tool-name">🔢 File Checksum</div>
+                            <div class="tool-description">MD5, SHA1, SHA256, SHA512 hashes</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="promptFileStrings()">
+                            <div class="tool-name">📜 Extract Strings</div>
+                            <div class="tool-description">Printable strings from any binary</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="promptFileHexdump()">
+                            <div class="tool-name">🗂️ Hex Dump</div>
+                            <div class="tool-description">Raw hex view of file bytes</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="promptFileType()">
+                            <div class="tool-name">🧬 File Type Analysis</div>
+                            <div class="tool-description">Detect type via magic bytes</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('recent_files', {directory: '.', days: 1})">
+                            <div class="tool-name">🕐 Recent Changes (1d)</div>
+                            <div class="tool-description">Files modified in last 24 hours</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('recent_files', {directory: '.', days: 7})">
+                            <div class="tool-name">📅 Recent Changes (7d)</div>
+                            <div class="tool-description">Files modified in last 7 days</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('process_forensics', {})">
+                            <div class="tool-name">🔬 Process Forensics</div>
+                            <div class="tool-description">/proc deep-dive: fds, maps, env</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="promptLogTail()">
+                            <div class="tool-name">📋 Log Tail</div>
+                            <div class="tool-description">Tail any log file with filter</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('run_command', {command: 'ps auxf 2>/dev/null || ps aux 2>/dev/null | head -30'})">
+                            <div class="tool-name">🌳 Process Tree</div>
+                            <div class="tool-description">Full process hierarchy (ps auxf)</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('run_command', {command: 'cat /proc/net/tcp 2>/dev/null | head -30'})">
+                            <div class="tool-name">🗺️ Raw TCP Table</div>
+                            <div class="tool-description">Raw /proc/net/tcp socket table</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('run_command', {command: 'ls -la /proc/' + String(location) + ' 2>/dev/null || ls /proc/ | head -20'})">
+                            <div class="tool-name">📁 /proc Filesystem</div>
+                            <div class="tool-description">Process filesystem entries</div>
+                        </div>
+                        <div class="lcars-button for-btn" onclick="executeCommand('run_command', {command: 'cat /etc/os-release 2>/dev/null && uname -a'})">
+                            <div class="tool-name">🖥️ OS Fingerprint</div>
+                            <div class="tool-description">Kernel, distro, platform details</div>
                         </div>
                     </div>
                 </div>
@@ -4109,6 +4300,80 @@
                 listAvailableTools();
             }
         });
+
+        // =====================================================
+        // Security Testing Functions
+        // =====================================================
+
+        async function runQuickSecurityScan() {
+            appendOutput('⚡ QUICK SECURITY SCAN', 'Running automated /api/security/scan...', 'info');
+            try {
+                const r = await fetch('/api/security/scan');
+                const data = await r.json();
+                appendOutput('🛡️ SECURITY SCAN COMPLETE', 
+                    `Timestamp: ${data.timestamp}\n\n` +
+                    `=== AUDIT ===\n${data.audit}\n\n` +
+                    `=== OPEN PORTS ===\n${data.ports}\n\n` +
+                    `=== SENSITIVE FILES ===\n${data.sensitive}`, 
+                    'success');
+            } catch (e) {
+                appendOutput('❌ SCAN FAILED', e.message, 'error');
+            }
+        }
+
+        async function promptHttpHeadersCheck() {
+            const url = prompt('URL to check security headers:', 'https://example.com');
+            if (!url) return;
+            executeCommand('http_headers_check', { url });
+        }
+
+        async function checkOwnHeaders() {
+            executeCommand('http_headers_check', { url: `http://localhost:${window.location.port || 5000}` });
+        }
+
+        async function promptSslCheck() {
+            const hostname = prompt('Hostname to check SSL certificate (e.g. google.com):');
+            if (!hostname) return;
+            executeCommand('ssl_check', { hostname });
+        }
+
+        // =====================================================
+        // Digital Forensics Functions
+        // =====================================================
+
+        async function promptFileChecksum() {
+            const filepath = prompt('File path to checksum:', 'server.js');
+            if (!filepath) return;
+            executeCommand('file_checksum', { filepath });
+        }
+
+        async function promptFileStrings() {
+            const filepath = prompt('File path to extract strings from:');
+            if (!filepath) return;
+            const minLength = parseInt(prompt('Minimum string length (default 6):', '6') || '6');
+            executeCommand('file_strings', { filepath, minLength });
+        }
+
+        async function promptFileHexdump() {
+            const filepath = prompt('File path to hex dump:');
+            if (!filepath) return;
+            const bytes = parseInt(prompt('Bytes to dump (default 256):', '256') || '256');
+            executeCommand('file_hexdump', { filepath, bytes });
+        }
+
+        async function promptFileType() {
+            const filepath = prompt('File path to analyze:', 'server.js');
+            if (!filepath) return;
+            executeCommand('file_type', { filepath });
+        }
+
+        async function promptLogTail() {
+            const filepath = prompt('Log file path (e.g. /var/log/syslog or ./app.log):');
+            if (!filepath) return;
+            const lines = parseInt(prompt('Lines to tail (default 50):', '50') || '50');
+            const search = prompt('Filter keyword (optional, leave blank for all):') || '';
+            executeCommand('log_tail', { filepath, lines, search: search || undefined });
+        }
 
         // =====================================================
         // Initialization

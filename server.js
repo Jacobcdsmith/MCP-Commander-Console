@@ -466,6 +466,334 @@ const executeTool = async (name, args = {}) => {
         };
       }
 
+      // ─── SECURITY TOOLS ────────────────────────────────────────────────
+
+      case "security_audit": {
+        const { directory: saDir = "." } = args || {};
+        let report = `╔══════════════════════════════╗\n║   SECURITY AUDIT REPORT      ║\n╚══════════════════════════════╝\n\n`;
+
+        // Open ports from /proc/net/tcp
+        try {
+          const tcp = await fs.readFile('/proc/net/tcp', 'utf8');
+          const listenLines = tcp.split('\n').slice(1).filter(l => l.trim());
+          const listeningPorts = [];
+          listenLines.forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if (parts[3] === '0A') { // LISTEN state
+              const portHex = parts[1].split(':')[1];
+              listeningPorts.push(parseInt(portHex, 16));
+            }
+          });
+          report += `🔌 LISTENING PORTS: ${listeningPorts.sort((a,b) => a-b).join(', ') || 'None detected'}\n\n`;
+        } catch (e) {
+          report += `🔌 LISTENING PORTS: Unable to read /proc/net/tcp\n\n`;
+        }
+
+        // World-writable files in project
+        const ww = safeExec(`find ${saDir} -maxdepth 4 -perm /o+w -type f 2>/dev/null | grep -v node_modules | grep -v .git | head -20`);
+        report += `⚠️  WORLD-WRITABLE FILES:\n${ww.output || '✅ None found'}\n\n`;
+
+        // Sensitive file patterns
+        const sf = safeExec(`find ${saDir} -maxdepth 5 \\( -name '.env' -o -name '*.pem' -o -name '*.key' -o -name 'id_rsa' -o -name '*.secret' -o -name 'credentials.*' \\) 2>/dev/null | grep -v node_modules | head -20`);
+        report += `🔑 SENSITIVE FILES:\n${sf.output || '✅ None found'}\n\n`;
+
+        // Git history for secrets
+        const gs = safeExec(`git log -p --all 2>/dev/null | grep -iE '(password|secret|token|api.?key|private.?key)\\s*[=:]' | head -5`);
+        report += `🔐 GIT SECRET PATTERNS:\n${gs.output || '✅ No obvious secrets in git history'}\n\n`;
+
+        // npm audit summary
+        const na = safeExec("npm audit --json 2>/dev/null");
+        if (na.success && na.output) {
+          try {
+            const ad = JSON.parse(na.output);
+            const meta = ad.metadata?.vulnerabilities || {};
+            const counts = Object.entries(meta).filter(([,v]) => v > 0).map(([k,v]) => `${k}: ${v}`).join(', ');
+            report += `📦 NPM VULNERABILITIES: ${counts || '✅ None found'}\n\n`;
+          } catch (e) {
+            report += `📦 NPM VULNERABILITIES: ${na.output.substring(0, 200)}\n\n`;
+          }
+        } else {
+          report += `📦 NPM VULNERABILITIES: audit check unavailable\n\n`;
+        }
+
+        // File permissions on server.js and dashboard.html
+        const perms = safeExec(`ls -la server.js dashboard.html package.json 2>/dev/null`);
+        report += `📋 KEY FILE PERMISSIONS:\n${perms.output || 'N/A'}`;
+
+        return { success: true, output: report };
+      }
+
+      case "http_headers_check": {
+        const { url: hhUrl = `http://localhost:${PORT}` } = args || {};
+        try {
+          const resp = await fetch(hhUrl, { method: 'GET', signal: AbortSignal.timeout(10000) });
+          const secHeaders = [
+            'strict-transport-security',
+            'content-security-policy',
+            'x-content-type-options',
+            'x-frame-options',
+            'x-xss-protection',
+            'referrer-policy',
+            'permissions-policy',
+            'cache-control',
+            'x-powered-by',
+            'server',
+          ];
+          let score = 0;
+          const protective = ['strict-transport-security','content-security-policy','x-content-type-options','x-frame-options','referrer-policy'];
+          let report = `HTTP Security Header Analysis\n`;
+          report += `URL: ${hhUrl}\nHTTP ${resp.status} ${resp.statusText}\n${'─'.repeat(55)}\n`;
+          for (const h of secHeaders) {
+            const val = resp.headers.get(h);
+            const isProtective = protective.includes(h);
+            const present = !!val;
+            if (isProtective && present) score++;
+            const icon = isProtective ? (present ? '✅' : '❌') : 'ℹ️ ';
+            report += `${icon} ${h}: ${val || 'NOT SET'}\n`;
+          }
+          report += `${'─'.repeat(55)}\nSecurity Score: ${score}/${protective.length} protective headers present`;
+          if (score === protective.length) report += ' ✅ EXCELLENT';
+          else if (score >= 3) report += ' ⚠️  GOOD';
+          else report += ' ❌ NEEDS IMPROVEMENT';
+          return { success: true, output: report };
+        } catch (e) {
+          return { success: false, error: `Request failed: ${e.message}` };
+        }
+      }
+
+      case "ssl_check": {
+        const { hostname: sslHost } = args || {};
+        if (!sslHost) return { success: false, error: "hostname is required" };
+        const clean = sslHost.replace(/^https?:\/\//, '').split('/')[0];
+        const r = safeExec(`echo | openssl s_client -connect ${clean}:443 -servername ${clean} 2>/dev/null | openssl x509 -noout -subject -issuer -dates -fingerprint -sha256 2>/dev/null`);
+        if (r.success && r.output) {
+          const lines = r.output.split('\n');
+          const notAfter = lines.find(l => l.includes('notAfter'));
+          let expiry = '';
+          if (notAfter) {
+            const dateStr = notAfter.split('=')[1]?.trim();
+            if (dateStr) {
+              const exp = new Date(dateStr);
+              const daysLeft = Math.floor((exp - Date.now()) / 86400000);
+              expiry = `\nDays Until Expiry: ${daysLeft} ${daysLeft < 30 ? '⚠️ EXPIRING SOON' : daysLeft < 0 ? '❌ EXPIRED' : '✅'}`;
+            }
+          }
+          return { success: true, output: `SSL Certificate: ${clean}\n${'─'.repeat(50)}\n${r.output}${expiry}` };
+        }
+        const curl = safeExec(`curl -vI https://${clean} 2>&1 | grep -E '(SSL|TLS|expire|issuer|subject|certificate|verify)' | head -15`);
+        return { success: true, output: curl.output || `SSL check for ${clean} returned no output — may be HTTP only` };
+      }
+
+      case "scan_sensitive_files": {
+        const { directory: ssDir = "." } = args || {};
+        const patterns = ['.env', '.env.local', '.env.production', '*.pem', '*.key', '*.p12', '*.pfx', 'id_rsa', 'id_dsa', 'id_ecdsa', '*.secret', 'secrets.*', 'credentials.*', '*.token', 'private_key*', '.netrc', '.htpasswd', 'shadow', 'passwd'];
+        const findPatterns = patterns.map(p => `-name "${p}"`).join(' -o ');
+        const found = safeExec(`find "${ssDir}" -maxdepth 8 \\( ${findPatterns} \\) 2>/dev/null | grep -v node_modules | grep -v .git | head -50`);
+        // Also check for high-entropy strings patterns (base64-like tokens)
+        const tokenScan = safeExec(`grep -rE '[a-zA-Z0-9+/]{40,}={0,2}' --include="*.json" --include="*.env" --include="*.config*" "${ssDir}" 2>/dev/null | grep -v node_modules | grep -v .git | head -10`);
+        let out = `Sensitive File Scan in: ${ssDir}\n${'─'.repeat(50)}\n`;
+        out += found.output ? `⚠️  FILES FOUND:\n${found.output}\n` : `✅ No sensitive files found\n`;
+        out += `\n📝 HIGH-ENTROPY TOKEN PATTERNS:\n${tokenScan.output || '✅ None detected'}`;
+        return { success: true, output: out };
+      }
+
+      case "git_secrets_scan": {
+        const history = safeExec("git log --oneline -20 2>/dev/null");
+        const secrets = safeExec(`git log -p --all 2>/dev/null | grep -nE '(password|passwd|secret|token|api.?key|private.?key|auth.?key)\\s*[=:].+' | head -30`);
+        const largeFiles = safeExec("git log --all --diff-filter=A --summary 2>/dev/null | grep -E '^\\s+[0-9]+ file' | head -10");
+        let out = `=== GIT SECRETS SCAN ===\n\n`;
+        out += `COMMIT HISTORY (last 20):\n${history.output || 'No git history'}\n\n`;
+        out += `POTENTIAL SECRET PATTERNS IN COMMITS:\n${secrets.output || '✅ No obvious secret patterns found in git history'}\n\n`;
+        out += `LARGE FILE ADDITIONS:\n${largeFiles.output || '✅ No unusually large file additions found'}`;
+        return { success: true, output: out };
+      }
+
+      case "cve_check": {
+        const r = safeExec("npm audit --json 2>/dev/null");
+        if (r.success && r.output) {
+          try {
+            const ad = JSON.parse(r.output);
+            const vulns = ad.vulnerabilities || {};
+            const meta = ad.metadata || {};
+            let report = `╔══════════════════════╗\n║   CVE/VULN REPORT    ║\n╚══════════════════════╝\n\n`;
+            const metaVulns = meta.vulnerabilities || {};
+            report += `SUMMARY:\n`;
+            report += `  Total packages: ${meta.totalDependencies || Object.keys(vulns).length}\n`;
+            for (const [sev, count] of Object.entries(metaVulns)) {
+              if (count > 0) {
+                const icon = sev === 'critical' ? '🔴' : sev === 'high' ? '🟠' : sev === 'moderate' ? '🟡' : '🟢';
+                report += `  ${icon} ${sev.toUpperCase()}: ${count}\n`;
+              }
+            }
+            report += `\nAFFECTED PACKAGES:\n`;
+            const entries = Object.entries(vulns).slice(0, 20);
+            if (entries.length === 0) {
+              report += `✅ No known vulnerabilities found\n`;
+            } else {
+              entries.forEach(([pkg, info]) => {
+                const sev = info.severity || 'unknown';
+                const icon = sev === 'critical' ? '🔴' : sev === 'high' ? '🟠' : sev === 'moderate' ? '🟡' : '🟢';
+                const via = Array.isArray(info.via) ? info.via.map(v => typeof v === 'string' ? v : (v.title || v.cwe || '')).filter(Boolean).join(', ') : '';
+                report += `${icon} ${pkg} (${sev})${via ? ': ' + via : ''}\n`;
+              });
+              if (Object.keys(vulns).length > 20) report += `... and ${Object.keys(vulns).length - 20} more\n`;
+            }
+            return { success: true, output: report };
+          } catch (e) {
+            return { success: true, output: `npm audit (raw):\n${r.output.substring(0, 3000)}` };
+          }
+        }
+        return { success: true, output: "npm audit: " + (r.output || r.error || "unavailable — run npm install first") };
+      }
+
+      // ─── FORENSICS TOOLS ───────────────────────────────────────────────
+
+      case "open_ports": {
+        try {
+          const tcp = await fs.readFile('/proc/net/tcp', 'utf8');
+          const tcp6 = await fs.readFile('/proc/net/tcp6', 'utf8').catch(() => '');
+          const parsePort = (hexAddr) => parseInt(hexAddr.split(':')[1], 16);
+          const states = { '0A': 'LISTEN', '01': 'ESTABLISHED', '06': 'TIME_WAIT', '0B': 'CLOSE_WAIT' };
+          const parse = (content, label) => {
+            return content.split('\n').slice(1).filter(l => l.trim()).map(line => {
+              const p = line.trim().split(/\s+/);
+              return { port: parsePort(p[1]), remPort: parsePort(p[2]), state: states[p[3]] || p[3], label };
+            }).filter(r => r.port > 0);
+          };
+          const all = [...parse(tcp, 'IPv4'), ...parse(tcp6, 'IPv6')];
+          const listening = all.filter(r => r.state === 'LISTEN');
+          const established = all.filter(r => r.state === 'ESTABLISHED');
+          let out = `LISTENING PORTS (${listening.length}):\n`;
+          const uniquePorts = [...new Set(listening.map(r => r.port))].sort((a,b) => a-b);
+          uniquePorts.forEach(port => out += `  ● ${port}/tcp\n`);
+          out += `\nESTABLISHED CONNECTIONS (${established.length}):\n`;
+          established.slice(0, 20).forEach(r => out += `  ↔ Local:${r.port} ↔ Remote:${r.remPort}\n`);
+          if (established.length > 20) out += `  ... and ${established.length - 20} more\n`;
+          return { success: true, output: out };
+        } catch (e) {
+          return { success: false, error: `Could not read network state: ${e.message}` };
+        }
+      }
+
+      case "file_checksum": {
+        const { filepath: fcPath } = args || {};
+        if (!fcPath) return { success: false, error: "filepath is required" };
+        const algos = [
+          ['MD5', `md5sum "${fcPath}" 2>/dev/null`],
+          ['SHA1', `sha1sum "${fcPath}" 2>/dev/null`],
+          ['SHA256', `sha256sum "${fcPath}" 2>/dev/null`],
+          ['SHA512', `sha512sum "${fcPath}" 2>/dev/null`],
+        ];
+        let out = `File Integrity Report: ${fcPath}\n${'─'.repeat(50)}\n`;
+        for (const [algo, cmd] of algos) {
+          const r = safeExec(cmd);
+          const hash = r.success ? r.output.split(' ')[0] : 'N/A';
+          out += `${algo.padEnd(6)}: ${hash}\n`;
+        }
+        // Also get file size and modification time
+        const stat = await fs.stat(path.resolve(fcPath)).catch(() => null);
+        if (stat) {
+          out += `${'─'.repeat(50)}\nSize    : ${formatBytes(stat.size)} (${stat.size} bytes)\nModified: ${stat.mtime.toISOString()}\nCreated : ${stat.birthtime.toISOString()}`;
+        }
+        return { success: true, output: out };
+      }
+
+      case "file_strings": {
+        const { filepath: fsPath, minLength: fsMin = 6 } = args || {};
+        if (!fsPath) return { success: false, error: "filepath is required" };
+        const r = safeExec(`strings -n ${fsMin} "${fsPath}" 2>/dev/null | head -100`);
+        const typeR = safeExec(`file "${fsPath}" 2>/dev/null`);
+        return {
+          success: true,
+          output: `File: ${fsPath}\nType: ${typeR.output || 'unknown'}\n${'─'.repeat(50)}\nPrintable Strings (min length ${fsMin}):\n${r.output || 'No printable strings found'}`
+        };
+      }
+
+      case "file_hexdump": {
+        const { filepath: fhPath, bytes: fhBytes = 256 } = args || {};
+        if (!fhPath) return { success: false, error: "filepath is required" };
+        const r = safeExec(`od -A x -t x1z -N ${fhBytes} "${fhPath}" 2>/dev/null`);
+        return { success: true, output: `Hex dump: ${fhPath} (first ${fhBytes} bytes)\n${'─'.repeat(50)}\n${r.output || 'Hex dump unavailable'}` };
+      }
+
+      case "file_type": {
+        const { filepath: ftPath } = args || {};
+        if (!ftPath) return { success: false, error: "filepath is required" };
+        const r = safeExec(`file "${ftPath}" 2>/dev/null && file -b --mime-type "${ftPath}" 2>/dev/null`);
+        return { success: true, output: r.output || r.error || "file command unavailable" };
+      }
+
+      case "recent_files": {
+        const { directory: rfDir = ".", days: rfDays = 1 } = args || {};
+        const r = safeExec(`find "${rfDir}" -maxdepth 6 -mtime -${rfDays} -type f 2>/dev/null | grep -v node_modules | grep -v .git | sort | head -60`);
+        // Also get modification times using ls
+        if (r.output) {
+          const withTimes = safeExec(`find "${rfDir}" -maxdepth 6 -mtime -${rfDays} -type f 2>/dev/null | grep -v node_modules | grep -v .git | xargs ls -la 2>/dev/null | sort -k6,7 | head -40`);
+          return {
+            success: true,
+            output: `Files modified in last ${rfDays} day(s) in ${rfDir}:\n${'─'.repeat(50)}\n${withTimes.output || r.output}`
+          };
+        }
+        return { success: true, output: `✅ No files modified in last ${rfDays} day(s) in ${rfDir}` };
+      }
+
+      case "network_connections": {
+        try {
+          const tcp = await fs.readFile('/proc/net/tcp', 'utf8');
+          const parseHexIP = (hex) => hex.match(/.{2}/g).reverse().map(b => parseInt(b, 16)).join('.');
+          const parseEntry = (line) => {
+            const p = line.trim().split(/\s+/);
+            if (p.length < 4) return null;
+            const [lhex, lport] = p[1].split(':');
+            const [rhex, rport] = p[2].split(':');
+            const stateMap = { '01':'ESTABLISHED','02':'SYN_SENT','03':'SYN_RECV','04':'FIN_WAIT1','05':'FIN_WAIT2','06':'TIME_WAIT','07':'CLOSE','08':'CLOSE_WAIT','09':'LAST_ACK','0A':'LISTEN','0B':'CLOSING' };
+            return {
+              local: `${parseHexIP(lhex)}:${parseInt(lport, 16)}`,
+              remote: `${parseHexIP(rhex)}:${parseInt(rport, 16)}`,
+              state: stateMap[p[3]] || p[3]
+            };
+          };
+          const entries = tcp.split('\n').slice(1).filter(l => l.trim()).map(parseEntry).filter(Boolean);
+          const grouped = {};
+          entries.forEach(e => { (grouped[e.state] = grouped[e.state] || []).push(e); });
+          let out = `Network Connections (IPv4/TCP)\n${'─'.repeat(55)}\n`;
+          for (const [state, conns] of Object.entries(grouped)) {
+            out += `\n[${state}] (${conns.length})\n`;
+            conns.slice(0, 10).forEach(c => out += `  ${c.local.padEnd(25)} → ${c.remote}\n`);
+            if (conns.length > 10) out += `  ... and ${conns.length - 10} more\n`;
+          }
+          return { success: true, output: out };
+        } catch (e) {
+          return { success: false, error: e.message };
+        }
+      }
+
+      case "process_forensics": {
+        const pid = process.pid;
+        const cmdline = safeExec(`cat /proc/${pid}/cmdline 2>/dev/null | tr '\\0' ' '`);
+        const status = safeExec(`cat /proc/${pid}/status 2>/dev/null | head -25`);
+        const fdCount = safeExec(`ls /proc/${pid}/fd 2>/dev/null | wc -l`);
+        const maps = safeExec(`cat /proc/${pid}/maps 2>/dev/null | grep -v '00000000' | head -20`);
+        const env = safeExec(`cat /proc/${pid}/environ 2>/dev/null | tr '\\0' '\\n' | grep -iE '(PORT|NODE|PATH|HOME)' | head -10`);
+        let out = `=== PROCESS FORENSICS: PID ${pid} ===\n\n`;
+        out += `Command: ${cmdline.output || 'N/A'}\n`;
+        out += `Open File Descriptors: ${fdCount.output || 'N/A'}\n\n`;
+        out += `=== PROCESS STATUS ===\n${status.output || 'N/A'}\n\n`;
+        out += `=== ENVIRONMENT VARS (KEY) ===\n${env.output || 'N/A'}\n\n`;
+        out += `=== MEMORY MAP (top 20) ===\n${maps.output || 'N/A'}`;
+        return { success: true, output: out };
+      }
+
+      case "log_tail": {
+        const { filepath: ltPath, lines: ltLines = 50, search: ltSearch = "" } = args || {};
+        if (!ltPath) return { success: false, error: "filepath is required" };
+        const cmd = ltSearch
+          ? `grep -i "${ltSearch}" "${ltPath}" 2>/dev/null | tail -n ${ltLines}`
+          : `tail -n ${ltLines} "${ltPath}" 2>/dev/null`;
+        const r = safeExec(cmd);
+        return { success: true, output: r.output || r.error || `Log file not found: ${ltPath}` };
+      }
+
       default:
         return { success: false, error: `Unknown tool: ${name}` };
     }
@@ -610,9 +938,43 @@ app.get('/api/tools', async (req, res) => {
       { name: "format_json", description: "Format JSON with proper indentation", category: "data" },
       { name: "search_files", description: "Search for text within files", category: "data" },
       // Environment
-      { name: "env_list", description: "List environment variables", category: "environment" }
+      { name: "env_list", description: "List environment variables", category: "environment" },
+      // Security
+      { name: "security_audit", description: "Comprehensive automated security audit", category: "security" },
+      { name: "http_headers_check", description: "Analyze HTTP security headers of any URL", category: "security" },
+      { name: "ssl_check", description: "Check SSL certificate details and expiry", category: "security" },
+      { name: "scan_sensitive_files", description: "Scan for sensitive files (.env, *.key, *.pem)", category: "security" },
+      { name: "git_secrets_scan", description: "Scan git history for potential secrets/credentials", category: "security" },
+      { name: "cve_check", description: "Check npm packages for CVEs and vulnerabilities", category: "security" },
+      { name: "open_ports", description: "List open and listening ports from /proc/net/tcp", category: "security" },
+      // Forensics
+      { name: "file_checksum", description: "Compute MD5, SHA1, SHA256, SHA512 for a file", category: "forensics" },
+      { name: "file_strings", description: "Extract printable strings from any file", category: "forensics" },
+      { name: "file_hexdump", description: "Hex dump of file contents", category: "forensics" },
+      { name: "file_type", description: "Detect file type using magic bytes", category: "forensics" },
+      { name: "recent_files", description: "Find recently modified files (timeline analysis)", category: "forensics" },
+      { name: "network_connections", description: "Show all TCP network connections by state", category: "forensics" },
+      { name: "process_forensics", description: "Deep process inspection via /proc filesystem", category: "forensics" },
+      { name: "log_tail", description: "Tail a log file with optional search filter", category: "forensics" }
     ]
   });
+});
+
+// Quick automated security scan endpoint
+app.get('/api/security/scan', async (req, res) => {
+  try {
+    const result = await executeTool('security_audit', { directory: '.' });
+    const ports = await executeTool('open_ports', {});
+    const sensitive = await executeTool('scan_sensitive_files', { directory: '.' });
+    res.json({
+      timestamp: new Date().toISOString(),
+      audit: result.output,
+      ports: ports.output,
+      sensitive: sensitive.output
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Suppress browser favicon 404
