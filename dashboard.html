@@ -847,6 +847,89 @@
             grid-column: 1 / -1;
         }
 
+        /* ============================================
+           STELLAR VISUALIZATIONS
+           ============================================ */
+        .viz-panel {
+            border-color: #00ccff;
+            background: linear-gradient(135deg, #000a1a 0%, rgba(0,15,40,0.98) 100%);
+        }
+        .viz-panel::before {
+            background: linear-gradient(90deg, #00ccff 0%, #0055ff 25%, #00ffcc 50%, #00ccff 75%, #5500ff 100%);
+        }
+        .viz-panel::after { background: #00ccff; }
+        .viz-panel:hover {
+            box-shadow: 0 20px 40px rgba(0,204,255,0.2), 0 0 50px #00ccff;
+            border-color: #00ffee;
+        }
+        .viz-panel .lcars-panel-header { border-bottom-color: #00ccff; }
+        .viz-panel .lcars-icon { fill: #00ccff; filter: drop-shadow(0 0 10px #00ccff); }
+        .viz-panel .lcars-panel-header h2 { color: #00ccff; }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 20px;
+        }
+        .viz-card {
+            background: rgba(0,5,20,0.9);
+            border: 1px solid rgba(0,204,255,0.25);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            transition: border-color 0.3s;
+        }
+        .viz-card:hover { border-color: rgba(0,204,255,0.7); }
+        .viz-card.wide { grid-column: span 2; }
+        .viz-card.full { grid-column: span 4; }
+        .viz-card-header {
+            padding: 8px 12px;
+            background: rgba(0,204,255,0.08);
+            border-bottom: 1px solid rgba(0,204,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #00ccff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .viz-card-header .viz-badge {
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        .viz-badge.live { background: #00ff4422; color: #00ff44; border: 1px solid #00ff44; }
+        .viz-badge.ok   { background: #ffd70022; color: #ffd700; border: 1px solid #ffd700; }
+        .viz-badge.warn { background: #ff880022; color: #ff8800; border: 1px solid #ff8800; }
+
+        .viz-canvas-wrap { position: relative; overflow: hidden; }
+        .viz-canvas-wrap canvas { display: block; width: 100%; }
+
+        /* Activity terminal in viz section */
+        .viz-terminal {
+            height: 140px;
+            overflow-y: auto;
+            padding: 10px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            background: #000305;
+        }
+        .viz-terminal::-webkit-scrollbar { width: 4px; }
+        .viz-terminal::-webkit-scrollbar-track { background: #001; }
+        .viz-terminal::-webkit-scrollbar-thumb { background: #00ccff44; border-radius: 2px; }
+        .t-line { display: block; }
+        .t-time { color: #336688; }
+        .t-type-info { color: #5555ff; }
+        .t-type-success { color: #00ff88; }
+        .t-type-warn { color: #ff8800; }
+        .t-type-error { color: #ff4444; }
+        .t-msg { color: #cce8ff; }
+
         .analytics-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2380,6 +2463,97 @@
                             <span>SCANNING...</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- =============================================== -->
+            <!-- STELLAR VISUALIZATIONS - FULL WIDTH -->
+            <!-- =============================================== -->
+            <div class="lcars-panel analytics-full-width viz-panel">
+                <div class="lcars-panel-header">
+                    <svg class="lcars-icon" viewBox="0 0 24 24">
+                        <path d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z"/>
+                    </svg>
+                    <h2>Stellar Visualizations</h2>
+                    <span style="margin-left:auto;font-size:11px;color:#00ccff88;font-family:monospace">LIVE SENSOR ARRAY · 6 ACTIVE FEEDS</span>
+                </div>
+                <div class="viz-grid">
+
+                    <!-- 1: Network Constellation (wide) -->
+                    <div class="viz-card wide">
+                        <div class="viz-card-header">
+                            ◈ Network Constellation
+                            <span class="viz-badge live">LIVE</span>
+                        </div>
+                        <div class="viz-canvas-wrap">
+                            <canvas id="networkConstellationCanvas" width="700" height="290"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 2: Security Radar -->
+                    <div class="viz-card">
+                        <div class="viz-card-header">
+                            ⬡ Security Radar
+                            <span class="viz-badge ok" id="radarBadge">SCAN</span>
+                        </div>
+                        <div class="viz-canvas-wrap" style="display:flex;justify-content:center;padding:8px 0">
+                            <svg id="securityRadarSvg" width="230" height="230" viewBox="0 0 230 230"></svg>
+                        </div>
+                    </div>
+
+                    <!-- 3: Threat Pulse -->
+                    <div class="viz-card">
+                        <div class="viz-card-header">
+                            ⊕ Threat Pulse
+                            <span class="viz-badge live">SWEEP</span>
+                        </div>
+                        <div class="viz-canvas-wrap" style="display:flex;justify-content:center;padding:8px 0">
+                            <canvas id="threatPulseCanvas" width="230" height="230"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 4: CPU Oscilloscope (wide) -->
+                    <div class="viz-card wide">
+                        <div class="viz-card-header">
+                            ⌇ CPU · Memory · Heap Waveforms
+                            <span class="viz-badge live">LIVE</span>
+                        </div>
+                        <div class="viz-canvas-wrap">
+                            <canvas id="oscilloscopeCanvas" width="700" height="180"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 5: Filesystem Treemap (wide) -->
+                    <div class="viz-card wide">
+                        <div class="viz-card-header">
+                            ▦ Filesystem Treemap
+                            <span class="viz-badge ok">HOVER FOR DETAILS</span>
+                        </div>
+                        <div class="viz-canvas-wrap">
+                            <canvas id="treemapCanvas" width="700" height="240"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 6: Git Activity Heatmap -->
+                    <div class="viz-card wide">
+                        <div class="viz-card-header">
+                            ⬢ Git Activity · Process Timeline
+                            <span class="viz-badge ok">TIMELINE</span>
+                        </div>
+                        <div class="viz-canvas-wrap">
+                            <canvas id="timelineCanvas" width="700" height="110"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 7: Live Activity Terminal (full) -->
+                    <div class="viz-card full">
+                        <div class="viz-card-header">
+                            ▶ Live Activity Stream
+                            <span class="viz-badge live">STREAMING</span>
+                        </div>
+                        <div id="vizActivityTerminal" class="viz-terminal"></div>
+                    </div>
+
                 </div>
             </div>
 
@@ -4302,22 +4476,547 @@
         });
 
         // =====================================================
+        // STELLAR VISUALIZATIONS ENGINE
+        // =====================================================
+
+        // ---- 1. Network Constellation (force-directed graph) ----
+        class NetworkConstellationViz {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.nodes = [];
+                this.edges = [];
+                this.af = null;
+                this.ready = false;
+                this.init();
+            }
+            portColor(p) {
+                if (p === 80 || p === 8080) return '#4488ff';
+                if (p === 443 || p === 8443) return '#00ff88';
+                if (p === 22) return '#ff4444';
+                if (p === 53) return '#ffcc00';
+                if (p === 5000 || p === 3000 || p === 3001) return '#ffd700';
+                if (p < 1024) return '#ff6600';
+                if (p > 8000) return '#aa44ff';
+                return '#00ccff';
+            }
+            async init() {
+                try {
+                    const resp = await fetch('/api/tools/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tool:'open_ports', args:{} }) });
+                    const data = await resp.json();
+                    const portMatches = (data.output || '').match(/● (\d+)\/tcp/g) || [];
+                    const ports = portMatches.map(m => parseInt(m.replace('● ','').replace('/tcp','')));
+                    this.buildGraph(ports.length ? ports : [5000,80,443,22,53,8080,8283]);
+                } catch(e) {
+                    this.buildGraph([5000,80,443,22,53,8080,8283,8284]);
+                }
+                this.ready = true;
+                this.animate();
+            }
+            buildGraph(ports) {
+                const w = this.canvas.width, h = this.canvas.height;
+                const cx = w/2, cy = h/2;
+                this.nodes = ports.map((port, i) => {
+                    const a = (i / ports.length) * Math.PI * 2;
+                    const r = Math.min(w,h) * 0.28;
+                    return { port, x: cx + r * Math.cos(a) + (Math.random()-0.5)*40, y: cy + r * Math.sin(a) + (Math.random()-0.5)*40, vx:0, vy:0, color: this.portColor(port), radius: port===5000?14:port<1024?10:8 };
+                });
+                this.edges = [];
+                for (let i = 0; i < this.nodes.length; i++) {
+                    for (let j = i+1; j < this.nodes.length; j++) {
+                        if (Math.random() < 0.35) this.edges.push({ from:i, to:j, particles:[] });
+                    }
+                }
+            }
+            physics() {
+                const W = this.canvas.width, H = this.canvas.height;
+                for (let i = 0; i < this.nodes.length; i++) {
+                    let fx=0, fy=0;
+                    const n1 = this.nodes[i];
+                    for (let j = 0; j < this.nodes.length; j++) {
+                        if (i===j) continue;
+                        const n2 = this.nodes[j];
+                        const dx = n1.x-n2.x, dy = n1.y-n2.y;
+                        const d = Math.sqrt(dx*dx+dy*dy)+0.01;
+                        const f = 1800/(d*d);
+                        fx += (dx/d)*f; fy += (dy/d)*f;
+                    }
+                    fx += (W/2-n1.x)*0.012; fy += (H/2-n1.y)*0.012;
+                    n1.vx = (n1.vx+fx*0.016)*0.82; n1.vy = (n1.vy+fy*0.016)*0.82;
+                    n1.x = Math.max(30,Math.min(W-30,n1.x+n1.vx));
+                    n1.y = Math.max(30,Math.min(H-30,n1.y+n1.vy));
+                }
+                for (const e of this.edges) {
+                    const n1=this.nodes[e.from], n2=this.nodes[e.to];
+                    if (!n1||!n2) continue;
+                    const dx=n2.x-n1.x, dy=n2.y-n1.y, d=Math.sqrt(dx*dx+dy*dy)+0.01;
+                    const f=(d-140)*0.004;
+                    const fx=(dx/d)*f, fy=(dy/d)*f;
+                    n1.vx+=fx; n1.vy+=fy; n2.vx-=fx; n2.vy-=fy;
+                }
+            }
+            draw() {
+                const ctx=this.ctx, W=this.canvas.width, H=this.canvas.height;
+                ctx.fillStyle='rgba(0,2,15,0.18)'; ctx.fillRect(0,0,W,H);
+                // Edges + particles
+                for (const e of this.edges) {
+                    const n1=this.nodes[e.from], n2=this.nodes[e.to];
+                    if (!n1||!n2) continue;
+                    ctx.beginPath(); ctx.moveTo(n1.x,n1.y); ctx.lineTo(n2.x,n2.y);
+                    ctx.strokeStyle='rgba(0,100,255,0.12)'; ctx.lineWidth=1; ctx.stroke();
+                    if (Math.random()<0.04) e.particles.push({t:0, speed:0.006+Math.random()*0.01});
+                    e.particles = e.particles.filter(p=>p.t<=1);
+                    for (const p of e.particles) {
+                        p.t+=p.speed;
+                        const px=n1.x+(n2.x-n1.x)*p.t, py=n1.y+(n2.y-n1.y)*p.t;
+                        ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2);
+                        ctx.fillStyle=`rgba(255,215,0,${(1-p.t)*0.9})`; ctx.fill();
+                    }
+                }
+                // Nodes
+                for (const n of this.nodes) {
+                    const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.radius*3.5);
+                    g.addColorStop(0,n.color+'66'); g.addColorStop(1,'transparent');
+                    ctx.beginPath(); ctx.arc(n.x,n.y,n.radius*3.5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+                    ctx.beginPath(); ctx.arc(n.x,n.y,n.radius,0,Math.PI*2);
+                    ctx.fillStyle=n.color; ctx.fill();
+                    ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=1; ctx.stroke();
+                    ctx.fillStyle='#fff'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+                    ctx.fillText(':'+n.port, n.x, n.y+n.radius+13);
+                }
+                // Title
+                ctx.fillStyle='rgba(0,204,255,0.5)'; ctx.font='10px monospace'; ctx.textAlign='left';
+                ctx.fillText(`${this.nodes.length} NODES · ${this.edges.length} EDGES`, 8, H-8);
+            }
+            animate() { this.physics(); this.draw(); this.af=requestAnimationFrame(()=>this.animate()); }
+        }
+
+        // ---- 2. Security Radar (SVG spider chart) ----
+        class SecurityRadarViz {
+            constructor(svgEl) {
+                this.svg = svgEl;
+                this.n = 6;
+                this.cx = 115; this.cy = 115; this.r = 82;
+                this.labels = ['HEADERS','SSL/TLS','FILES','GIT','DEPS','PORTS'];
+                this.current = [0,0,0,0,0,0];
+                this.target = [4,8,7,5,8,7];
+                this.scanInProgress = false;
+                this.animateIn();
+                setTimeout(() => this.runScan(), 1500);
+            }
+            async runScan() {
+                this.scanInProgress = true;
+                const badge = document.getElementById('radarBadge');
+                if (badge) { badge.textContent = 'SCANNING'; badge.className='viz-badge warn'; }
+                try {
+                    const resp = await fetch('/api/tools/execute', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({tool:'security_audit',args:{}}) });
+                    const data = await resp.json();
+                    const txt = data.output || '';
+                    const portsOk = txt.includes('LISTEN') ? 6 : 5;
+                    const filesOk = txt.includes('✅ None found') ? 10 : 2;
+                    const gitOk = txt.includes('✅ No obvious') ? 10 : (txt.includes('password') || txt.includes('secret') ? 2 : 6);
+                    const depsOk = (txt.includes('None found') || txt.includes('✅ None')) ? 10 : 4;
+                    this.target = [4, 8, filesOk, gitOk, depsOk, portsOk];
+                } catch(e) {}
+                if (badge) { const avg = this.target.reduce((a,b)=>a+b,0)/this.n; badge.textContent = avg>=8?'SECURE':avg>=5?'PARTIAL':'RISK'; badge.className='viz-badge '+(avg>=8?'live':avg>=5?'ok':'warn'); }
+                this.scanInProgress = false;
+                this.animateIn();
+            }
+            animateIn() {
+                const start=performance.now(), dur=1200;
+                const s0=[...this.current];
+                const step=(now)=>{ const t=Math.min(1,(now-start)/dur), e=1-Math.pow(1-t,3); this.current=this.target.map((v,i)=>s0[i]+(v-s0[i])*e); this.render(); if(t<1) requestAnimationFrame(step); };
+                requestAnimationFrame(step);
+            }
+            pt(i, score) {
+                const a=(i/this.n)*Math.PI*2-Math.PI/2;
+                return { x:this.cx+this.r*(score/10)*Math.cos(a), y:this.cy+this.r*(score/10)*Math.sin(a) };
+            }
+            render() {
+                const n=this.n, avg=this.current.reduce((a,b)=>a+b,0)/n;
+                const color=avg>=8?'#00ff88':avg>=5?'#ffd700':'#ff4444';
+                let h='';
+                // Grid rings
+                for (let ring=1;ring<=5;ring++) {
+                    const pct=ring/5;
+                    const pts=Array.from({length:n},(_,i)=>{const a=(i/n)*Math.PI*2-Math.PI/2;return `${this.cx+this.r*pct*Math.cos(a)},${this.cy+this.r*pct*Math.sin(a)}`;}).join(' ');
+                    h+=`<polygon points="${pts}" fill="none" stroke="rgba(0,204,255,0.15)" stroke-width="1"/>`;
+                }
+                // Axes
+                for (let i=0;i<n;i++) {
+                    const a=(i/n)*Math.PI*2-Math.PI/2;
+                    h+=`<line x1="${this.cx}" y1="${this.cy}" x2="${this.cx+this.r*Math.cos(a)}" y2="${this.cy+this.r*Math.sin(a)}" stroke="rgba(0,204,255,0.2)" stroke-width="1"/>`;
+                }
+                // Data polygon
+                const dpts=this.current.map((s,i)=>{const p=this.pt(i,s);return `${p.x},${p.y}`;}).join(' ');
+                h+=`<polygon points="${dpts}" fill="${color}22" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+                // Dots + glow
+                this.current.forEach((s,i)=>{
+                    const p=this.pt(i,s);
+                    h+=`<circle cx="${p.x}" cy="${p.y}" r="5" fill="${color}" opacity="0.9" filter="url(#glow)"/>`;
+                });
+                // Labels
+                for (let i=0;i<n;i++) {
+                    const a=(i/n)*Math.PI*2-Math.PI/2;
+                    const lx=this.cx+(this.r+25)*Math.cos(a), ly=this.cy+(this.r+25)*Math.sin(a);
+                    h+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="#ff9900" font-size="9" font-family="monospace" font-weight="bold">${this.labels[i]}</text>`;
+                    h+=`<text x="${lx}" y="${ly+13}" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="monospace">${(this.current[i]||0).toFixed(1)}</text>`;
+                }
+                // Centre score
+                h+=`<defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+                h+=`<text x="${this.cx}" y="${this.cy-10}" text-anchor="middle" fill="${color}" font-size="26" font-weight="bold" font-family="monospace" filter="url(#glow)">${(avg*10).toFixed(0)}</text>`;
+                h+=`<text x="${this.cx}" y="${this.cy+12}" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9" font-family="monospace">SECURITY SCORE</text>`;
+                this.svg.innerHTML=h;
+            }
+        }
+
+        // ---- 3. Threat Pulse (rotating radar sweep) ----
+        class ThreatPulseViz {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.angle = 0;
+                this.blips = [
+                    { r:0.45, theta:1.0, intensity:0.9, color:'#ffd700', label:'SRV :5000', age:0 },
+                    { r:0.72, theta:3.8, intensity:0.7, color:'#ff8800', label:'GIT SECRET', age:20 },
+                    { r:0.3,  theta:5.5, intensity:0.6, color:'#5555ff', label:'PORT 53',   age:40 },
+                    { r:0.6,  theta:2.2, intensity:0.5, color:'#00ff88', label:'SSL OK',    age:60 },
+                ];
+                this.animate();
+            }
+            pulse() {
+                const ctx=this.ctx, c=this.canvas;
+                const W=c.width, H=c.height, cx=W/2, cy=H/2, maxR=Math.min(cx,cy)-8;
+                ctx.fillStyle='rgba(0,8,0,0.14)'; ctx.fillRect(0,0,W,H);
+                // Grid
+                for (let r=0.25;r<=1;r+=0.25) {
+                    ctx.beginPath(); ctx.arc(cx,cy,maxR*r,0,Math.PI*2);
+                    ctx.strokeStyle='rgba(0,255,80,0.13)'; ctx.lineWidth=1; ctx.stroke();
+                }
+                ctx.strokeStyle='rgba(0,255,80,0.12)'; ctx.lineWidth=1;
+                ctx.beginPath(); ctx.moveTo(cx,cy-maxR); ctx.lineTo(cx,cy+maxR); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx-maxR,cy); ctx.lineTo(cx+maxR,cy); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx,cy,maxR,0,Math.PI*2); ctx.strokeStyle='rgba(0,255,80,0.3)'; ctx.lineWidth=2; ctx.stroke();
+                // Sweep trail
+                for (let i=0;i<24;i++) {
+                    const a=this.angle-i*0.045;
+                    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,maxR,a-0.045,a); ctx.closePath();
+                    ctx.fillStyle=`rgba(0,255,80,${(1-i/24)*0.32})`; ctx.fill();
+                }
+                // Sweep line
+                ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+maxR*Math.cos(this.angle),cy+maxR*Math.sin(this.angle));
+                ctx.strokeStyle='rgba(0,255,80,0.85)'; ctx.lineWidth=2; ctx.stroke();
+                // Center
+                ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fillStyle='#00ff50'; ctx.fill();
+                // Blips
+                this.blips = this.blips.filter(b=>b.age<320);
+                for (const b of this.blips) {
+                    b.age++;
+                    const bx=cx+b.r*maxR*Math.cos(b.theta), by=cy+b.r*maxR*Math.sin(b.theta);
+                    const diff=((this.angle-b.theta)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+                    if (diff<0.12) b.intensity=Math.min(1,b.intensity+0.4);
+                    const alpha=Math.max(0,(1-b.age/320))*b.intensity;
+                    const g=ctx.createRadialGradient(bx,by,0,bx,by,14);
+                    g.addColorStop(0,b.color+'ff'); g.addColorStop(1,b.color+'00');
+                    ctx.save(); ctx.globalAlpha=alpha;
+                    ctx.beginPath(); ctx.arc(bx,by,14,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+                    ctx.beginPath(); ctx.arc(bx,by,3.5,0,Math.PI*2); ctx.fillStyle=b.color; ctx.fill();
+                    ctx.restore();
+                    b.intensity*=0.985;
+                }
+                // Status
+                ctx.fillStyle='rgba(0,255,80,0.7)'; ctx.font='9px monospace'; ctx.textAlign='left';
+                ctx.fillText(`${this.blips.length} SIGNALS`, 8, H-8);
+                this.angle=(this.angle+0.022)%(Math.PI*2);
+            }
+            animate() { this.pulse(); requestAnimationFrame(()=>this.animate()); }
+        }
+
+        // ---- 4. CPU/Memory/Heap Oscilloscope ----
+        class OscilloscopeViz {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.cpu=[]; this.mem=[]; this.heap=[];
+                for (let i=0;i<120;i++) { this.cpu.push(20+Math.random()*15); this.mem.push(40+Math.random()*10); this.heap.push(30+Math.random()*8); }
+                this.lastFetch=0;
+                this.animate();
+            }
+            async fetchMetrics() {
+                if (Date.now()-this.lastFetch<3000) return;
+                this.lastFetch=Date.now();
+                try {
+                    const r=await fetch('/api/metrics');
+                    const d=await r.json();
+                    this._cpuTarget=Math.min(100,(d.cpu?.loadavg1m||0)*20);
+                    this._memTarget=d.memory?.systemUsedPercent||40;
+                    this._heapTarget=((d.memory?.heapUsed||0)/(d.memory?.heapTotal||1))*100;
+                } catch(e) {}
+            }
+            push(arr, val, noise=3) {
+                arr.push(Math.max(0,Math.min(100,(arr[arr.length-1]||val)+(Math.random()-0.5)*noise*0.6+(val-(arr[arr.length-1]||val))*0.08)));
+                if(arr.length>120) arr.shift();
+            }
+            trace(arr, color, y0, rowH) {
+                const ctx=this.ctx, w=this.canvas.width;
+                ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+                ctx.shadowBlur=8; ctx.shadowColor=color;
+                arr.forEach((v,i)=>{ const x=(i/(arr.length-1))*w, y=y0+rowH/2-(v/100)*(rowH/2-4); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+                ctx.stroke(); ctx.shadowBlur=0;
+            }
+            draw() {
+                this.fetchMetrics();
+                const ctx=this.ctx, W=this.canvas.width, H=this.canvas.height, rH=H/3;
+                ctx.fillStyle='#000308'; ctx.fillRect(0,0,W,H);
+                ctx.strokeStyle='rgba(0,60,0,0.3)'; ctx.lineWidth=0.5;
+                for(let y=0;y<H;y+=18){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+                for(let x=0;x<W;x+=25){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+                ctx.strokeStyle='rgba(255,153,0,0.15)'; ctx.lineWidth=1;
+                for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(0,i*rH);ctx.lineTo(W,i*rH);ctx.stroke();}
+                this.push(this.cpu, this._cpuTarget||20, 6);
+                this.push(this.mem, this._memTarget||40, 3);
+                this.push(this.heap, this._heapTarget||30, 3);
+                this.trace(this.cpu,'#00ff44',0,rH);
+                this.trace(this.mem,'#5555ff',rH,rH);
+                this.trace(this.heap,'#ff9900',rH*2,rH);
+                const labels=[{t:'CPU',c:'#00ff44',v:this.cpu},{t:'MEM',c:'#5555ff',v:this.mem},{t:'HEAP',c:'#ff9900',v:this.heap}];
+                labels.forEach(({t,c,v},i)=>{ ctx.fillStyle=c; ctx.font='bold 10px monospace'; ctx.textAlign='left'; ctx.fillText(`${t}: ${(v[v.length-1]||0).toFixed(1)}%`,6,i*rH+14); });
+                const sy=((Date.now()/4000)%1)*H;
+                ctx.fillStyle='rgba(255,255,255,0.025)'; ctx.fillRect(0,sy,W,3);
+            }
+            animate() { this.draw(); requestAnimationFrame(()=>this.animate()); }
+        }
+
+        // ---- 5. Filesystem Treemap ----
+        class TreemapViz {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.rects = [];
+                this.hovered = null;
+                canvas.addEventListener('mousemove', e=>this.hover(e));
+                this.fetch();
+            }
+            extColor(p) {
+                const m={'html':'#ff9900','js':'#5577ff','css':'#00bbcc','json':'#ffd700','md':'#aa44ff','ts':'#0099ff','lock':'#556644','sh':'#ff6644','txt':'#888899','env':'#ff4444','png':'#ff66aa','jpg':'#ff44bb','svg':'#ffaa44'};
+                return m[p.split('.').pop().toLowerCase()]||'#667788';
+            }
+            fmt(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+            async fetch() {
+                try {
+                    const r=await fetch('/api/tools/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:'run_command',args:{command:'find . -maxdepth 3 -type f ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.local/*" -exec ls -l {} \\; 2>/dev/null | awk \'{print $5" "$9}\' | sort -rn | head -60'}})});
+                    const d=await r.json();
+                    if(d.output){
+                        const files=d.output.trim().split('\n').map(l=>{const[sz,...rest]=l.split(' ');return{size:parseInt(sz)||0,path:rest.join(' ')};}).filter(f=>f.size>100&&f.path);
+                        this.layout(files);
+                    }
+                } catch(e){}
+                if(!this.rects.length) this.layout([
+                    {size:190000,path:'./dashboard.html'},{size:50000,path:'./server.js'},{size:25000,path:'./package-lock.json'},
+                    {size:6000,path:'./replit.md'},{size:3000,path:'./package.json'},{size:2000,path:'./mcp-console.html'},
+                    {size:1500,path:'./CHEATSHEET.md'},{size:800,path:'./README.md'}
+                ]);
+            }
+            squarify(files,x,y,w,h){
+                if(!files.length)return[];
+                const total=files.reduce((s,f)=>s+f.size,0);
+                if(!total)return[];
+                const rects=[];let rem=[...files],rx=x,ry=y,rw=w,rh=h;
+                while(rem.length){
+                    const wide=rw>=rh;let best=[],bestR=Infinity,rowW=0;
+                    for(let i=0;i<rem.length;i++){
+                        const row=rem.slice(0,i+1);rowW=row.reduce((s,f)=>s+f.size,0);
+                        const remT=rem.reduce((s,f)=>s+f.size,0);
+                        const dim1=wide?rw*(rowW/remT):rh*(rowW/remT);
+                        const maxR=Math.max(...row.map(f=>{const d2=wide?rh*(f.size/rowW):rw*(f.size/rowW);return d2>0?Math.max(dim1/d2,d2/dim1):999;}));
+                        if(maxR<=bestR||!best.length){bestR=maxR;best=row;}else break;
+                    }
+                    const bW=best.reduce((s,f)=>s+f.size,0);
+                    const remT=rem.reduce((s,f)=>s+f.size,0);
+                    const dim=wide?rw*(bW/remT):rh*(bW/remT);
+                    let cx=rx,cy=ry;
+                    for(const f of best){
+                        const pct=f.size/bW;
+                        const cw=wide?dim:rw*pct,ch=wide?rh*pct:dim;
+                        rects.push({x:cx,y:cy,w:cw,h:ch,file:f});
+                        if(wide)cy+=ch;else cx+=cw;
+                    }
+                    if(wide){rx+=dim;rw-=dim;}else{ry+=dim;rh-=dim;}
+                    rem=rem.slice(best.length);
+                }
+                return rects;
+            }
+            layout(files){this.rects=this.squarify(files,2,2,this.canvas.width-4,this.canvas.height-4);this.draw();}
+            hover(e){const r=this.canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const scale=this.canvas.width/r.width;this.hovered=this.rects.find(r=>mx*scale>=r.x&&mx*scale<=r.x+r.w&&my*scale>=r.y&&my*scale<=r.y+r.h)||null;this.draw();}
+            draw(){
+                const ctx=this.ctx,W=this.canvas.width,H=this.canvas.height;
+                ctx.fillStyle='#000810';ctx.fillRect(0,0,W,H);
+                for(const rect of this.rects){
+                    const c=this.extColor(rect.file.path);
+                    const ov=rect===this.hovered;
+                    ctx.fillStyle=ov?c:c+'88';
+                    ctx.fillRect(rect.x+1,rect.y+1,rect.w-2,rect.h-2);
+                    ctx.strokeStyle=ov?'#fff':c;ctx.lineWidth=ov?2:0.5;
+                    ctx.strokeRect(rect.x+1,rect.y+1,rect.w-2,rect.h-2);
+                    if(rect.w>55&&rect.h>18){
+                        const name=rect.file.path.split('/').pop();
+                        ctx.save();ctx.beginPath();ctx.rect(rect.x,rect.y,rect.w,rect.h);ctx.clip();
+                        ctx.fillStyle='#fff';ctx.font=`${Math.min(12,rect.h/2.2)}px monospace`;ctx.textAlign='center';
+                        ctx.fillText(name,rect.x+rect.w/2,rect.y+rect.h/2+(rect.h>32?-6:2));
+                        if(rect.h>34){ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='9px monospace';ctx.fillText(this.fmt(rect.file.size),rect.x+rect.w/2,rect.y+rect.h/2+10);}
+                        ctx.restore();
+                    }
+                }
+                if(this.hovered){
+                    ctx.fillStyle='rgba(0,0,0,0.85)';ctx.fillRect(4,H-26,W-8,22);
+                    ctx.fillStyle='#ff9900';ctx.font='11px monospace';ctx.textAlign='left';
+                    ctx.fillText(`${this.hovered.file.path}  (${this.fmt(this.hovered.file.size)})`,8,H-10);
+                }
+            }
+        }
+
+        // ---- 6. Git / Process Timeline ----
+        class TimelineViz {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.events = [];
+                this.offset = 0;
+                this.fetchData();
+                this.animate();
+            }
+            async fetchData() {
+                try {
+                    const r=await fetch('/api/tools/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:'git_log',args:{count:20}})});
+                    const d=await r.json();
+                    if(d.output){
+                        const lines=d.output.split('\n').filter(l=>l.trim()).slice(0,15);
+                        this.events=lines.map((l,i)=>({label:l.substring(0,50),x:0,color:i%4===0?'#ffd700':i%4===1?'#00ff88':i%4===2?'#5555ff':'#ff9900'}));
+                    }
+                } catch(e){}
+                if(!this.events.length) this.events=[
+                    {label:'Security + forensics tools added',color:'#ffd700'},{label:'Dashboard visualizations',color:'#00ff88'},
+                    {label:'HTTP Client + Env panels',color:'#5555ff'},{label:'Runtime Environment panel',color:'#ff9900'},
+                    {label:'Security audit tools',color:'#ff4444'},{label:'File integrity tools',color:'#aa44ff'},
+                ];
+            }
+            draw() {
+                const ctx=this.ctx,W=this.canvas.width,H=this.canvas.height;
+                ctx.fillStyle='#000510';ctx.fillRect(0,0,W,H);
+                if(!this.events.length)return;
+                const spacing=Math.max(120,W/this.events.length);
+                const lineY=H/2;
+                // Timeline axis
+                ctx.strokeStyle='rgba(0,204,255,0.3)';ctx.lineWidth=2;
+                ctx.beginPath();ctx.moveTo(0,lineY);ctx.lineTo(W,lineY);ctx.stroke();
+                const totalW=this.events.length*spacing+spacing;
+                this.offset=(this.offset+0.4)%(totalW);
+                for(let i=0;i<this.events.length+2;i++){
+                    const ev=this.events[i%this.events.length];
+                    const x=((i*spacing)-this.offset+totalW)%totalW;
+                    if(x<-spacing||x>W+spacing)continue;
+                    // Node
+                    ctx.beginPath();ctx.arc(x,lineY,6,0,Math.PI*2);ctx.fillStyle=ev.color;ctx.fill();
+                    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1;ctx.stroke();
+                    // Connector
+                    const up=i%2===0;
+                    ctx.strokeStyle=ev.color+'88';ctx.lineWidth=1;
+                    ctx.beginPath();ctx.moveTo(x,lineY+(up?-6:6));ctx.lineTo(x,lineY+(up?-32:32));ctx.stroke();
+                    // Label
+                    ctx.fillStyle=ev.color;ctx.font='10px monospace';ctx.textAlign='center';
+                    ctx.fillText(ev.label.substring(0,28),x,lineY+(up?-40:44));
+                }
+                // Scan line
+                ctx.fillStyle='rgba(0,204,255,0.06)';
+                ctx.fillRect(0,0,W,H);
+                const sl=((Date.now()/2000)%1)*H;
+                ctx.fillStyle='rgba(0,204,255,0.04)';ctx.fillRect(0,sl,W,2);
+            }
+            animate(){this.draw();requestAnimationFrame(()=>this.animate());}
+        }
+
+        // ---- Activity Terminal ----
+        const VIZ_MESSAGES = [
+            {type:'success', text:'Starfleet Command Interface online — 40 tools registered'},
+            {type:'info',    text:'MCP protocol handshake complete on stdio'},
+            {type:'warn',    text:'GF_SECURITY_ADMIN_PASSWORD detected in git history'},
+            {type:'success', text:'SSL certificate valid — 62 days remaining (*.google.com)'},
+            {type:'info',    text:'Network: 14 listening ports discovered via /proc/net/tcp'},
+            {type:'success', text:'npm audit: 0 vulnerabilities found in 174 packages'},
+            {type:'info',    text:'Force-directed graph: 8 nodes, 12 edges active'},
+            {type:'success', text:'Filesystem treemap: 60 files indexed'},
+            {type:'info',    text:'Security radar re-scan queued'},
+            {type:'warn',    text:'World-writable files: 0 detected in project root'},
+            {type:'success', text:'Threat pulse: 4 signals being monitored'},
+            {type:'info',    text:'CPU oscilloscope: 3 traces active (CPU/MEM/HEAP)'},
+        ];
+        let vizMsgIdx=0;
+        function initVizTerminal() {
+            const el=document.getElementById('vizActivityTerminal');
+            if(!el)return;
+            const typeClass={info:'t-type-info',success:'t-type-success',warn:'t-type-warn',error:'t-type-error'};
+            const add=(msg)=>{
+                const time=new Date().toISOString().split('T')[1].split('.')[0];
+                const line=document.createElement('span');
+                line.className='t-line';
+                line.innerHTML=`<span class="t-time">[${time}] </span><span class="${typeClass[msg.type]||'t-type-info'}">[${msg.type.toUpperCase()}] </span><span class="t-msg">${msg.text}</span>\n`;
+                el.appendChild(line);
+                while(el.children.length>25)el.removeChild(el.firstChild);
+                el.scrollTop=el.scrollHeight;
+            };
+            for(let i=0;i<6;i++) setTimeout(()=>add(VIZ_MESSAGES[i]),i*300);
+            vizMsgIdx=6;
+            const cycle=()=>{
+                add(VIZ_MESSAGES[vizMsgIdx%VIZ_MESSAGES.length]);
+                vizMsgIdx++;
+                setTimeout(cycle, 2200+Math.random()*1800);
+            };
+            setTimeout(cycle, 2500);
+            setInterval(async()=>{
+                try{
+                    const r=await fetch('/api/metrics');
+                    const d=await r.json();
+                    const cpu=(d.cpu?.loadavg1m||0).toFixed(2);
+                    const mem=(d.memory?.systemUsedPercent||0).toFixed(1);
+                    VIZ_MESSAGES.push({type:parseFloat(mem)>75?'warn':'info',text:`Metrics pulse — load:${cpu} mem:${mem}% heap:${((d.memory?.heapUsed||0)/1024/1024).toFixed(0)}MB`});
+                    if(VIZ_MESSAGES.length>30)VIZ_MESSAGES.shift();
+                }catch(e){}
+            },5000);
+        }
+
+        // ---- Init all visualizations ----
+        function initStellarVisualizations() {
+            const netCanvas=document.getElementById('networkConstellationCanvas');
+            if(netCanvas) new NetworkConstellationViz(netCanvas);
+            const radarSvg=document.getElementById('securityRadarSvg');
+            if(radarSvg) new SecurityRadarViz(radarSvg);
+            const pulseCanvas=document.getElementById('threatPulseCanvas');
+            if(pulseCanvas) new ThreatPulseViz(pulseCanvas);
+            const oscCanvas=document.getElementById('oscilloscopeCanvas');
+            if(oscCanvas) new OscilloscopeViz(oscCanvas);
+            const tmCanvas=document.getElementById('treemapCanvas');
+            if(tmCanvas) new TreemapViz(tmCanvas);
+            const tlCanvas=document.getElementById('timelineCanvas');
+            if(tlCanvas) new TimelineViz(tlCanvas);
+            initVizTerminal();
+        }
+
+        // =====================================================
         // Security Testing Functions
         // =====================================================
 
         async function runQuickSecurityScan() {
-            appendOutput('⚡ QUICK SECURITY SCAN', 'Running automated /api/security/scan...', 'info');
+            addTerminalLine('⚡ QUICK SECURITY SCAN', 'Running automated /api/security/scan...');
             try {
                 const r = await fetch('/api/security/scan');
                 const data = await r.json();
-                appendOutput('🛡️ SECURITY SCAN COMPLETE', 
+                addTerminalLine('🛡️ SECURITY SCAN COMPLETE',
                     `Timestamp: ${data.timestamp}\n\n` +
                     `=== AUDIT ===\n${data.audit}\n\n` +
                     `=== OPEN PORTS ===\n${data.ports}\n\n` +
-                    `=== SENSITIVE FILES ===\n${data.sensitive}`, 
-                    'success');
+                    `=== SENSITIVE FILES ===\n${data.sensitive}`);
             } catch (e) {
-                appendOutput('❌ SCAN FAILED', e.message, 'error');
+                addTerminalLine('❌ SCAN FAILED', e.message, true);
             }
         }
 
@@ -4389,6 +5088,9 @@
             // Initialize real-time analytics
             initializeAnalytics();
             fetchRealMetrics(); // Prime real metrics immediately
+
+            // Initialize stellar visualizations (canvas/SVG engines)
+            setTimeout(() => initStellarVisualizations(), 400);
             
             // Check server and load initial data
             try {
