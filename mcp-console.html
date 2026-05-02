@@ -832,19 +832,28 @@
             .servers-panel,
             .toolbox-panel,
             .inspector-panel,
-            .feeds-panel,
+            .messages-feed,
             .servers-panel.lcars-enter,
             .toolbox-panel.lcars-enter,
             .inspector-panel.lcars-enter,
-            .feeds-panel.lcars-enter,
+            .messages-feed.lcars-enter,
             .add-server-btn,
             .server-btn,
             .modal-btn,
             .execute-btn,
             .server-card {
+                animation: none !important;
                 animation-duration: 0.01ms !important;
                 animation-delay: 0ms !important;
+                transition: none !important;
                 transition-duration: 0.01ms !important;
+            }
+            .servers-panel:hover,
+            .toolbox-panel:hover,
+            .inspector-panel:hover,
+            .messages-feed:hover,
+            .server-card:hover {
+                transform: none !important;
             }
             html { scroll-behavior: auto; }
         }
@@ -1681,17 +1690,53 @@
         });
 
         // Smoothness pass — staggered panel entrance + ripple feedback
+        let _mcpEntranceAnimationsApplied = false;
         function applyMcpEntranceAnimations() {
+            if (_mcpEntranceAnimationsApplied) return;
+            _mcpEntranceAnimationsApplied = true;
             const reduce = window.matchMedia &&
                 window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (reduce) return;
-            const panels = document.querySelectorAll(
+            const panels = Array.from(document.querySelectorAll(
                 '.servers-panel, .toolbox-panel, .inspector-panel, .messages-feed'
-            );
-            panels.forEach((p, i) => {
+            ));
+            if (!panels.length) return;
+
+            const viewportH = window.innerHeight || document.documentElement.clientHeight;
+            const aboveFold = [];
+            const belowFold = [];
+            panels.forEach((p) => {
+                const rect = p.getBoundingClientRect();
+                if (rect.top < viewportH * 0.9) aboveFold.push(p);
+                else belowFold.push(p);
+            });
+
+            // Above-the-fold: cascade immediately
+            aboveFold.forEach((p, i) => {
                 p.style.setProperty('--enter-delay', (i * 90) + 'ms');
                 p.classList.add('lcars-enter');
             });
+
+            // Below-the-fold: reveal on scroll via IntersectionObserver
+            if (!('IntersectionObserver' in window) || !belowFold.length) {
+                belowFold.forEach((p, i) => {
+                    p.style.setProperty('--enter-delay', (i * 90) + 'ms');
+                    p.classList.add('lcars-enter');
+                });
+                return;
+            }
+            let revealCount = 0;
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    const el = entry.target;
+                    el.style.setProperty('--enter-delay', (revealCount * 90) + 'ms');
+                    revealCount++;
+                    el.classList.add('lcars-enter');
+                    io.unobserve(el);
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+            belowFold.forEach((p) => io.observe(p));
         }
 
         function attachMcpRippleFeedback() {
