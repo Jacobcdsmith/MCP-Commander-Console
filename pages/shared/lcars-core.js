@@ -245,14 +245,27 @@ function applyEntranceAnimations() {
         else belowFold.push(p);
     });
 
+    // Removing .lcars-enter on animationend lets the panel's :hover
+    // transform take over cleanly afterward — otherwise the entrance
+    // animation's forwards-held transform would mask hover lifts.
+    function bindEnterCleanup(el) {
+        el.addEventListener('animationend', function onEnd(ev) {
+            if (ev.animationName !== 'lcarsPanelEnter') return;
+            el.classList.remove('lcars-enter');
+            el.removeEventListener('animationend', onEnd);
+        });
+    }
+
     aboveFold.forEach((p, i) => {
         p.style.setProperty('--enter-delay', (i * 70) + 'ms');
+        bindEnterCleanup(p);
         p.classList.add('lcars-enter');
     });
 
     if (!('IntersectionObserver' in window) || !belowFold.length) {
         belowFold.forEach((p, i) => {
             p.style.setProperty('--enter-delay', (i * 70) + 'ms');
+            bindEnterCleanup(p);
             p.classList.add('lcars-enter');
         });
         return;
@@ -265,6 +278,7 @@ function applyEntranceAnimations() {
             el.style.setProperty('--enter-delay', (revealCount * 70) + 'ms');
             revealCount++;
             el.classList.remove('lcars-pre-reveal');
+            bindEnterCleanup(el);
             el.classList.add('lcars-enter');
             io.unobserve(el);
         });
