@@ -2,25 +2,7 @@
 
 ![Starfleet Command Banner](https://github.com/user-attachments/assets/e725d526-03ab-4591-9ce3-e8b42caa183f)
 
-```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║  ██████╗████████╗ █████╗ ██████╗ ███████╗██╗     ███████╗███████╗████████╗  ║
-║ ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║     ██╔════╝██╔════╝╚══██╔══╝  ║
-║ ╚█████╗    ██║   ███████║██████╔╝█████╗  ██║     █████╗  █████╗     ██║     ║
-║  ╚═══██╗   ██║   ██╔══██║██╔══██╗██╔══╝  ██║     ██╔══╝  ██╔══╝     ██║     ║
-║ ██████╔╝   ██║   ██║  ██║██║  ██║██║     ███████╗███████╗███████╗   ██║     ║
-║ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚══════╝╚══════╝╚══════╝   ╚═╝     ║
-║                                                                              ║
-║          ███╗   ███╗ ██████╗██████╗      ███████╗███████╗██████╗            ║
-║          ████╗ ████║██╔════╝██╔══██╗     ██╔════╝██╔════╝██╔══██╗           ║
-║          ██╔████╔██║██║     ██████╔╝     ███████╗█████╗  ██████╔╝           ║
-║          ██║╚██╔╝██║██║     ██╔═══╝      ╚════██║██╔══╝  ██╔══██╗           ║
-║          ██║ ╚═╝ ██║╚██████╗██║          ███████║███████╗██║  ██║           ║
-║          ╚═╝     ╚═╝ ╚═════╝╚═╝          ╚══════╝╚══════╝╚═╝  ╚═╝           ║
-║                                                                              ║
-║              ◈  STARFLEET COMMAND  ·  MCP OPERATIONS CENTER  ◈              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-```
+
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.17%2B-5555ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNFY3bC04IDR6Ii8+PC9zdmc+)](https://github.com/modelcontextprotocol/sdk)
