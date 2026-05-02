@@ -124,11 +124,16 @@ body::before {
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                background 0.28s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
 }
 
 .back-btn:hover {
