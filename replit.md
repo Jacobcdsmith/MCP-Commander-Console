@@ -113,10 +113,24 @@ PORT=5000 node server.js
 14. **Ship's Status** — Real-time system stats (platform, CPUs, memory, uptime, hostname)
 15. **Real-Time Analytics** *(full-width)* — Live CPU/memory charts (blended real + animated), gauges, heatmap, sparklines, activity feed from `/api/metrics` every 5s
 
-## Output Console (right pane)
-- Sticky split-pane layout: 65% left (scrollable panels), 35% right (sticky console)
-- All tool output appears in right-pane console without losing scroll position
-- Empty-state placeholder until first tool activated; restored on clear
+## Starfleet Boot Intro
+- Cinematic full-screen overlay (`#starfleet-intro`) on first DOM load
+- LCARS bars sweep in, side pillars rise, starfield + warp streaks fade in
+- Animated Starfleet delta emblem (SVG with gold gradient + glow)
+- Boot log lines type out sequentially (subspace, warp, deflector, etc.)
+- Final flash + "ACCESS GRANTED · WELCOME, COMMANDER" pill
+- Dismissible via SPACE / ESC / click; auto-dismisses after ~5.3s
+- Honors `prefers-reduced-motion`: skips immediately for accessibility
+- All timeouts tracked + cancelled on dismiss; uses capture-phase keydown +
+  `stopImmediatePropagation` so it doesn't conflict with the floating-console
+  Esc shortcut
+
+## Floating Output Console
+- Single full-width main pane; output console is a floating overlay
+- Bottom-right "▸ CONSOLE" pill toggles it open/closed (default: closed)
+- Draggable header, maximize toggle, unread-line badge that pulses on new output
+- Open/closed state, position, and maximize state persist in `localStorage`
+- Shortcuts: Ctrl+\` toggle, Esc collapse (in addition to existing Ctrl+R/K/H/T)
 
 ## Dependencies
 - `@modelcontextprotocol/sdk` — MCP protocol implementation
