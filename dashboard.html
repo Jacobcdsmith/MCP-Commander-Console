@@ -3798,11 +3798,14 @@
                     return id;
                 };
 
-                // Honor reduced-motion: skip the cinematic and reveal the
+                // Honor reduced-motion OR ?skipintro=1 URL param (handy for
+                // automated screenshots, headless captures, and quick reloads
+                // during development): skip the cinematic and reveal the
                 // dashboard immediately.
                 const reduceMotion = window.matchMedia &&
                     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                if (reduceMotion) {
+                const urlSkip = new URLSearchParams(window.location.search).has('skipintro');
+                if (reduceMotion || urlSkip) {
                     setTimeout(dismiss, 50);
                     document.addEventListener('keydown', onKey, true);
                     overlay.addEventListener('click', dismiss);
@@ -3946,13 +3949,29 @@
             }, { passive: true });
         }
 
+        // URL-param escape hatches for screenshots / automation / demos:
+        //   ?skipintro=1   — bypass the cinematic boot intro
+        //   ?tour=1        — force-start the guided tour after intro
+        //   ?openconsole=1 — open the floating output console on load
+        function _promoFlags() {
+            try { return new URLSearchParams(window.location.search); }
+            catch (_) { return new URLSearchParams(); }
+        }
+
         // Trigger the smoothness pass once the intro is gone (or immediately
         // if the intro isn't present, e.g. for prefers-reduced-motion users).
         document.addEventListener('starfleet:ready', () => {
             applyEntranceAnimations();
-            // Auto-launch the guided tour the first time a user lands.
-            if (!localStorage.getItem('lcars.tutorial.completed')) {
-                setTimeout(() => startTutorial(false), 800);
+            const params = _promoFlags();
+            const forceTour = params.has('tour');
+            const openConsole = params.has('openconsole');
+            // Auto-launch the guided tour the first time a user lands, or
+            // whenever ?tour=1 is in the URL (replays even after completion).
+            if (forceTour || !localStorage.getItem('lcars.tutorial.completed')) {
+                setTimeout(() => startTutorial(forceTour), 800);
+            }
+            if (openConsole && typeof openFloatingTerminal === 'function') {
+                setTimeout(() => openFloatingTerminal(), 400);
             }
         }, { once: true });
         document.addEventListener('DOMContentLoaded', () => {
@@ -3961,8 +3980,13 @@
             // hot-reload), still apply entrance animations.
             if (!document.getElementById('starfleet-intro')) {
                 applyEntranceAnimations();
-                if (!localStorage.getItem('lcars.tutorial.completed')) {
-                    setTimeout(() => startTutorial(false), 600);
+                const params = _promoFlags();
+                const forceTour = params.has('tour');
+                if (forceTour || !localStorage.getItem('lcars.tutorial.completed')) {
+                    setTimeout(() => startTutorial(forceTour), 600);
+                }
+                if (params.has('openconsole') && typeof openFloatingTerminal === 'function') {
+                    setTimeout(() => openFloatingTerminal(), 200);
                 }
             }
         }, { once: true });

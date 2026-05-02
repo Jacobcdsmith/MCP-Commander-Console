@@ -1,0 +1,50 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "q0tmuUv_Fg-zy5y10h9Ix"
+uri = "file://promo/screenshots/15-promo-page.jpg"
+type = "image"
+title = "Promotional showcase page (hero)"
+
+[[outputs]]
+id = "djIdjdXEXKUFajrKeEyPP"
+uri = "file://promo/screenshots/01-intro-cinematic.jpg"
+type = "image"
+title = "01 — Cinematic boot intro"
+
+[[outputs]]
+id = "KPlnZiYpsB91pMPmSe1qG"
+uri = "file://promo/screenshots/02-modules-hub.jpg"
+type = "image"
+title = "02 — Modules hub"
+
+[[outputs]]
+id = "5ObKM6eHzMA8dNmUmQeXs"
+uri = "file://promo/screenshots/03-dashboard-main.jpg"
+type = "image"
+title = "03 — Main dashboard"
+
+[[outputs]]
+id = "3f5T5kFGNugJtfFKL28K1"
+uri = "file://promo/screenshots/04-guided-tour.jpg"
+type = "image"
+title = "04 — Guided tour overlay"
+
+[[outputs]]
+id = "D3xQw8HSgF6CO-4PFevRh"
+uri = "file://promo/screenshots/05-redteam.jpg"
+type = "image"
+title = "05 — Red Team range"
+
+[[outputs]]
+id = "8nrDZVgRRn2JXiD1KOXlw"
+uri = "file://promo/screenshots/08-analytics-module.jpg"
+type = "image"
+title = "08 — Real-time analytics"
+
+[[outputs]]
+id = "XRUL4em3mKxjyklfDmIxC"
+uri = "file://promo/screenshots/14-floating-console.jpg"
+type = "image"
+title = "14 — Floating output console"

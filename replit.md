@@ -11,9 +11,10 @@ An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (LCAR
 
 ## Project Layout
 - `server.js` — Main server (MCP protocol + Express HTTP dashboard)
-- `dashboard.html` — Main LCARS-styled dashboard UI (4100+ lines)
+- `dashboard.html` — Main LCARS-styled dashboard UI (~6,700 lines)
 - `mcp-console.html` — MCP console interface
 - `pages/` — Additional static dashboard pages
+- `promo/` — Promotional landing page + 14 captured screenshots
 
 ## Running the Server
 ```
@@ -166,6 +167,30 @@ PORT=5000 node server.js
 - `express` — HTTP server
 - `cors` — CORS middleware
 - `zod` — Schema validation
+
+## Promotional Materials
+- `promo/index.html` — Standalone animated LCARS landing/showcase page served
+  at `/promo/` via the existing `express.static(__dirname)` middleware
+  (no server route changes required)
+- `promo/screenshots/01-14*.jpg` — 14 captured app screenshots (intro,
+  dashboard, tour, console, modules hub, all 9 sub-modules, redteam)
+- `promo/screenshots/15-promo-page.jpg` — Snapshot of the promo page itself
+- Page features: animated starfield, gradient hero with per-word reveal,
+  animated stat counters, auto-cycling showcase carousel synced to a
+  keyboard-accessible thumbnail tablist, IntersectionObserver reveal-on-scroll,
+  feature grid, 8-category toolbox, animated quote card
+- Honors `prefers-reduced-motion` in CSS *and* JS (counter and carousel
+  autoplay both no-op under reduced motion)
+- `?static=1` URL flag freezes all entrance animations + counters to their
+  final state for clean screenshot/print captures (real users never use it)
+- Carousel thumbnails are real `<button>` elements with `role="tab"` /
+  `aria-current` and visible focus rings
+
+## URL Param Escape Hatches (for screenshots / automation / demos)
+- `/?skipintro=1` — bypass the cinematic boot intro
+- `/?tour=1` — force-replay the guided tour (works with or without `skipintro`)
+- `/?openconsole=1` — open the floating output console
+- `/promo/?static=1` — freeze all entrance animations on the promo page
 
 ## Notes
 - Docker/Docker Compose configs exist but are not used in Replit (Docker not available)
