@@ -160,9 +160,8 @@
             background: radial-gradient(circle, var(--warp-core-blue) 0%, var(--lcars-blue) 100%);
             border-radius: 50%;
             box-shadow: 
-                0 0 20px var(--warp-core-blue),
-                inset 0 0 10px rgba(255,255,255,0.3);
-            animation: warpCorePulse 2s ease-in-out infinite alternate;
+                0 0 12px var(--warp-core-blue),
+                inset 0 0 8px rgba(255,255,255,0.25);
             position: relative;
         }
 
@@ -176,18 +175,12 @@
             height: 8px;
             background: var(--lcars-white);
             border-radius: 50%;
-            animation: warpCorePulse 1s ease-in-out infinite alternate;
         }
 
+        /* warpCorePulse animation kept defined but no longer applied to body indicators —
+           static glow only, to reduce always-on visual noise. */
         @keyframes warpCorePulse {
-            0% { 
-                box-shadow: 0 0 20px var(--warp-core-blue), inset 0 0 10px rgba(255,255,255,0.3);
-                transform: scale(1);
-            }
-            100% { 
-                box-shadow: 0 0 40px var(--warp-core-blue), 0 0 60px var(--warp-core-blue), inset 0 0 15px rgba(255,255,255,0.5);
-                transform: scale(1.1);
-            }
+            0%, 100% { box-shadow: 0 0 20px var(--warp-core-blue), inset 0 0 10px rgba(255,255,255,0.3); }
         }
 
         .status-text {
@@ -211,8 +204,8 @@
         .lcars-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
         /* Any trailing odd panel (last child that would be alone in a row) fills full width */
@@ -343,7 +336,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 25px 30px 20px 30px;
+            padding: 18px 22px 14px 22px;
             margin-bottom: 0;
             border-bottom: 3px solid var(--lcars-blue);
             position: relative;
@@ -354,13 +347,12 @@
             width: 32px;
             height: 32px;
             fill: var(--enterprise-gold);
-            filter: drop-shadow(0 0 10px var(--enterprise-gold));
-            animation: iconGlow 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 6px var(--enterprise-gold));
         }
 
+        /* iconGlow animation removed from body icons — header strips keep their motion. */
         @keyframes iconGlow {
-            0% { filter: drop-shadow(0 0 10px var(--enterprise-gold)); }
-            100% { filter: drop-shadow(0 0 20px var(--enterprise-gold)) drop-shadow(0 0 30px var(--enterprise-gold)); }
+            0%, 100% { filter: drop-shadow(0 0 6px var(--enterprise-gold)); }
         }
 
         .lcars-panel h2 {
@@ -375,7 +367,7 @@
         }
 
         .panel-content {
-            padding: 30px;
+            padding: 22px;
             position: relative;
             z-index: 2;
         }
@@ -628,25 +620,21 @@
         .terminal-prompt {
             color: var(--enterprise-gold);
             font-weight: 700;
-            text-shadow: 0 0 10px var(--enterprise-gold);
         }
 
         .terminal-command {
             color: var(--warp-core-blue);
             font-weight: 600;
-            text-shadow: 0 0 8px var(--warp-core-blue);
         }
 
         .terminal-output {
             color: var(--console-green);
             opacity: 0.9;
             font-family: 'Rajdhani', monospace;
-            text-shadow: 0 0 5px var(--console-green);
         }
 
         .terminal-output.error {
             color: var(--alert-red);
-            text-shadow: 0 0 10px var(--alert-red);
             animation: errorFlash 0.5s ease-in-out 3;
         }
 
@@ -660,10 +648,57 @@
             background: linear-gradient(135deg, var(--lcars-gray) 0%, rgba(0,0,50,0.95) 100%);
             border: 3px solid var(--lcars-purple);
             border-radius: 25px 0 25px 0;
-            padding: 20px 30px;
-            margin-top: 20px;
+            padding: 14px 22px;
+            margin-top: 16px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+        }
+
+        .control-more-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .control-more-menu {
+            position: absolute;
+            right: 0;
+            bottom: calc(100% + 8px);
+            min-width: 220px;
+            background: linear-gradient(135deg, #0a0a25 0%, #000010 100%);
+            border: 2px solid var(--lcars-purple);
+            border-radius: 12px 0 12px 0;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 200;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 18px rgba(204,153,204,0.35);
+        }
+
+        .control-more-menu.open {
+            display: flex;
+        }
+
+        .control-more-item {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            padding: 8px 12px;
+            border: 1px solid transparent;
+            border-radius: 8px 0 8px 0;
+            background: transparent;
+            color: var(--lcars-light-blue);
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .control-more-item:hover {
+            background: rgba(204,153,204,0.12);
+            border-color: var(--lcars-purple);
+            color: var(--lcars-white);
         }
 
         .lcars-control-panel::before {
@@ -1557,38 +1592,46 @@
            SPLIT-PANE LAYOUT
            ============================================ */
 
-        .split-pane-wrapper {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        .left-pane {
-            flex: 1;
+        /* Main pane is now full-width — terminal is a floating overlay */
+        .main-pane {
+            width: 100%;
             min-width: 0;
         }
 
-        .right-pane {
-            flex: 0 0 360px;
-            position: sticky;
-            top: 20px;
-            height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .right-console-panel {
+        /* ─── Floating Terminal Console ──────────────────────── */
+        .floating-console {
+            position: fixed;
+            right: 24px;
+            bottom: 80px;
+            width: 520px;
+            height: 50vh;
+            min-width: 360px;
+            min-height: 280px;
+            max-width: 95vw;
+            max-height: 90vh;
             background: linear-gradient(135deg, #000011 0%, #000a1a 100%);
             border: 3px solid var(--lcars-red);
             border-radius: 20px 0 20px 0;
             display: flex;
             flex-direction: column;
-            height: 100%;
             overflow: hidden;
-            position: relative;
+            z-index: 9000;
+            box-shadow: 0 18px 60px rgba(0,0,0,0.55), 0 0 30px rgba(204,102,102,0.35);
+            transition: opacity 0.18s ease, transform 0.18s ease;
         }
 
-        .right-console-panel::before {
+        .floating-console.hidden {
+            display: none;
+        }
+
+        .floating-console.maximized {
+            right: 5vw;
+            bottom: 5vh;
+            width: 90vw;
+            height: 90vh;
+        }
+
+        .floating-console::before {
             content: '';
             position: absolute;
             top: 0;
@@ -1602,34 +1645,42 @@
                 var(--lcars-red) 100%);
             animation: lcarsStrip 4s linear infinite;
             z-index: 3;
+            pointer-events: none;
         }
 
-        .right-console-panel::after {
+        .floating-console::after {
             content: '';
             position: absolute;
             top: 0;
             right: 0;
-            width: 50px;
+            width: 36px;
             height: 100%;
             background: var(--lcars-red);
             border-radius: 0 17px 17px 0;
-            opacity: 0.75;
+            opacity: 0.7;
             z-index: 1;
+            pointer-events: none;
         }
 
-        .right-console-header {
+        .floating-console-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 70px 14px 18px;
-            background: linear-gradient(90deg, rgba(0,0,50,0.9) 0%, transparent 100%);
+            padding: 12px 56px 12px 16px;
+            background: linear-gradient(90deg, rgba(0,0,50,0.95) 0%, transparent 100%);
             border-bottom: 2px solid var(--lcars-red);
             position: relative;
             z-index: 2;
             flex-shrink: 0;
+            cursor: grab;
+            user-select: none;
         }
 
-        .right-console-header h3 {
+        .floating-console-header.dragging {
+            cursor: grabbing;
+        }
+
+        .floating-console-header h3 {
             font-family: 'Orbitron', monospace;
             font-size: 0.85rem;
             font-weight: 700;
@@ -1637,40 +1688,65 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             margin: 0;
-            text-shadow: 0 0 10px var(--enterprise-gold);
+            flex: 1;
         }
 
-        .right-console-dots {
+        .floating-console-dots {
             display: flex;
             gap: 6px;
-            margin-right: 4px;
         }
 
-        .right-console-output {
+        .floating-console-window-btns {
+            display: flex;
+            gap: 6px;
+            margin-left: 6px;
+        }
+
+        .console-window-btn {
+            background: rgba(0,0,30,0.5);
+            border: 1px solid var(--lcars-red);
+            color: var(--lcars-light-blue);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            line-height: 1;
+            width: 26px;
+            height: 22px;
+            border-radius: 6px 0 6px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .console-window-btn:hover {
+            background: var(--lcars-red);
+            color: var(--lcars-white);
+        }
+
+        .floating-console-output {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 70px 16px 18px;
+            padding: 14px 56px 14px 16px;
             position: relative;
             z-index: 2;
             font-family: 'Rajdhani', monospace;
         }
 
-        .right-console-output::-webkit-scrollbar {
+        .floating-console-output::-webkit-scrollbar {
             width: 6px;
         }
 
-        .right-console-output::-webkit-scrollbar-track {
+        .floating-console-output::-webkit-scrollbar-track {
             background: rgba(0,0,30,0.5);
         }
 
-        .right-console-output::-webkit-scrollbar-thumb {
+        .floating-console-output::-webkit-scrollbar-thumb {
             background: var(--lcars-red);
             border-radius: 3px;
         }
 
-        .right-console-actions {
+        .floating-console-actions {
             border-top: 2px solid var(--lcars-red);
-            padding: 12px 70px 12px 18px;
+            padding: 10px 56px 10px 16px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -1726,16 +1802,87 @@
             line-height: 1.6;
         }
 
-        /* Responsive: collapse to single column on narrow screens */
+        /* ─── Floating Toggle Pill ───────────────────────────── */
+        .console-toggle-pill {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: linear-gradient(45deg, var(--lcars-dark-blue) 0%, var(--lcars-blue) 100%);
+            border: 2px solid var(--lcars-orange);
+            border-radius: 24px 6px 24px 6px;
+            color: var(--enterprise-gold);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            z-index: 9001;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 14px rgba(255,153,0,0.35);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .console-toggle-pill:hover {
+            transform: translateY(-2px);
+            border-color: var(--enterprise-gold);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.55), 0 0 22px rgba(255,215,0,0.5);
+        }
+
+        .console-toggle-pill .pill-arrow {
+            font-size: 0.9rem;
+            color: var(--lcars-light-blue);
+        }
+
+        .console-toggle-pill.has-unread {
+            border-color: var(--enterprise-gold);
+        }
+
+        .console-toggle-pill.pulse {
+            animation: pillPulse 0.9s ease-out 2;
+        }
+
+        @keyframes pillPulse {
+            0%   { box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 14px rgba(255,153,0,0.35); }
+            50%  { box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 28px rgba(255,215,0,0.85); }
+            100% { box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 14px rgba(255,153,0,0.35); }
+        }
+
+        .console-toggle-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: var(--alert-red);
+            color: var(--lcars-white);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .console-toggle-badge.empty {
+            display: none;
+        }
+
+        /* Responsive: shrink floating console on narrow screens */
         @media (max-width: 1100px) {
-            .split-pane-wrapper {
-                flex-direction: column;
+            .floating-console {
+                right: 12px;
+                left: 12px;
+                bottom: 80px;
+                width: auto;
+                max-width: none;
+                height: 55vh;
             }
-            .right-pane {
-                flex: none;
-                width: 100%;
-                position: static;
-                height: 480px;
+            .console-toggle-pill {
+                right: 12px;
+                bottom: 12px;
             }
         }
 
@@ -1857,8 +2004,7 @@
             <a href="/pages/redteam.html"  class="nav-link redteam">⚔️ Red Team</a>
         </nav>
 
-        <div class="split-pane-wrapper">
-        <div class="left-pane">
+        <div class="main-pane">
         <div class="lcars-grid">
             <!-- GIT OPERATIONS PANEL -->
             <div class="lcars-panel">
@@ -2956,77 +3102,75 @@
                 <button class="lcars-control-btn btn-primary" onclick="refreshDashboard()">
                     <span>⟳ System Refresh</span>
                 </button>
-                <button class="lcars-control-btn btn-secondary" onclick="clearTerminal()">
-                    <span>✕ Console Reset</span>
-                </button>
                 <button class="lcars-control-btn btn-success" onclick="runHealthCheck()">
                     <span>⚡ Full Diagnostic</span>
                 </button>
                 <button class="lcars-control-btn btn-primary" onclick="listAvailableTools()">
                     <span>📋 MCP Tools</span>
                 </button>
-                <button class="lcars-control-btn btn-secondary" onclick="loadDockerContainers()">
-                    <span>🐳 Docker Status</span>
-                </button>
-                <button class="lcars-control-btn btn-secondary" onclick="dockerStats()">
-                    <span>📊 Container Stats</span>
-                </button>
-                <button class="lcars-control-btn btn-secondary" onclick="checkAllServices()">
-                    <span>💓 Service Health</span>
-                </button>
                 <button class="lcars-control-btn btn-secondary" onclick="promptRunCommand()">
                     <span>⌨ Quick Command</span>
                 </button>
-                <button class="lcars-control-btn btn-primary" onclick="executeCommand('system_info')">
-                    <span>💻 System Info</span>
-                </button>
-                <button class="lcars-control-btn btn-secondary" onclick="executeCommand('git_status')">
-                    <span>📊 Git Status</span>
-                </button>
-                <button class="lcars-control-btn btn-success" onclick="publicIP()">
-                    <span>🌍 Public IP</span>
-                </button>
-                <button class="lcars-control-btn btn-secondary" onclick="checkPorts()">
-                    <span>🔌 Active Ports</span>
-                </button>
+                <div class="control-more-wrapper">
+                    <button class="lcars-control-btn btn-secondary" onclick="toggleControlMore(event)">
+                        <span>More ▾</span>
+                    </button>
+                    <div class="control-more-menu" id="control-more-menu">
+                        <button class="control-more-item" onclick="loadDockerContainers(); closeControlMore()">🐳 Docker Status</button>
+                        <button class="control-more-item" onclick="dockerStats(); closeControlMore()">📊 Container Stats</button>
+                        <button class="control-more-item" onclick="checkAllServices(); closeControlMore()">💓 Service Health</button>
+                        <button class="control-more-item" onclick="executeCommand('system_info'); closeControlMore()">💻 System Info</button>
+                        <button class="control-more-item" onclick="executeCommand('git_status'); closeControlMore()">📊 Git Status</button>
+                        <button class="control-more-item" onclick="publicIP(); closeControlMore()">🌍 Public IP</button>
+                        <button class="control-more-item" onclick="checkPorts(); closeControlMore()">🔌 Active Ports</button>
+                        <button class="control-more-item" onclick="clearTerminal(); closeControlMore()">✕ Clear Console</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        </div><!-- end left-pane -->
-
-        <!-- RIGHT PANE: Sticky Output Console -->
-        <div class="right-pane">
-            <div class="right-console-panel">
-                <div class="right-console-header">
-                    <div class="right-console-dots">
-                        <div class="status-indicator operational"></div>
-                        <div class="status-indicator standby"></div>
-                        <div class="status-indicator operational"></div>
-                    </div>
-                    <h3>Output Console</h3>
-                </div>
-                <div class="right-console-output" id="terminal-content">
-                    <div class="console-empty-state" id="console-empty-state">
-                        <div class="console-empty-icon">⚡</div>
-                        <div class="console-empty-text">Activate any tool on the left<br>to see results here</div>
-                    </div>
-                </div>
-                <div class="right-console-actions">
-                    <button class="console-action-btn" onclick="clearTerminal()">✕ Clear</button>
-                    <button class="console-action-btn" onclick="refreshDashboard()">⟳ Refresh</button>
-                    <button class="console-action-btn" onclick="runHealthCheck()">⚡ Diagnose</button>
-                    <button class="console-action-btn" onclick="listAvailableTools()">📋 Tools</button>
-                </div>
-            </div>
-        </div><!-- end right-pane -->
-
-        </div><!-- end split-pane-wrapper -->
+        </div><!-- end main-pane -->
 
         <div class="starfleet-footer">
             <div class="federation-emblem">★</div>
             <p class="footer-text">STARFLEET COMMAND - Enhanced MCP Server Interface</p>
         </div>
     </div>
+
+    <!-- Floating Output Console (overlay) -->
+    <div class="floating-console hidden" id="floating-console" role="dialog" aria-label="Output Console">
+        <div class="floating-console-header" id="floating-console-header">
+            <div class="floating-console-dots">
+                <div class="status-indicator operational"></div>
+                <div class="status-indicator standby"></div>
+                <div class="status-indicator operational"></div>
+            </div>
+            <h3>Output Console</h3>
+            <div class="floating-console-window-btns">
+                <button class="console-window-btn" id="console-maximize-btn" title="Maximize" onclick="toggleTerminalMaximize(event)">▢</button>
+                <button class="console-window-btn" id="console-close-btn" title="Collapse (Esc)" onclick="closeFloatingTerminal(event)">▾</button>
+            </div>
+        </div>
+        <div class="floating-console-output" id="terminal-content">
+            <div class="console-empty-state" id="console-empty-state">
+                <div class="console-empty-icon">⚡</div>
+                <div class="console-empty-text">Activate any tool<br>to see results here</div>
+            </div>
+        </div>
+        <div class="floating-console-actions">
+            <button class="console-action-btn" onclick="clearTerminal()">✕ Clear</button>
+            <button class="console-action-btn" onclick="refreshDashboard()">⟳ Refresh</button>
+            <button class="console-action-btn" onclick="runHealthCheck()">⚡ Diagnose</button>
+            <button class="console-action-btn" onclick="listAvailableTools()">📋 Tools</button>
+        </div>
+    </div>
+
+    <!-- Floating Toggle Pill -->
+    <button class="console-toggle-pill" id="console-toggle-pill" onclick="toggleFloatingTerminal()" title="Open Console (Ctrl+`)">
+        <span class="pill-arrow" id="pill-arrow">▸</span>
+        <span>Console</span>
+        <span class="console-toggle-badge empty" id="console-toggle-badge">0</span>
+    </button>
 
     <script>
         // =====================================================
@@ -3142,7 +3286,215 @@
             while (terminal.children.length > 102) {
                 terminal.removeChild(terminal.firstChild);
             }
+
+            // Notify floating-terminal layer (badge / pulse if collapsed)
+            if (typeof notifyTerminalActivity === 'function') {
+                notifyTerminalActivity();
+            }
         }
+
+        // =====================================================
+        // Floating Terminal Console (overlay + toggle pill)
+        // =====================================================
+        const TERMINAL_STATE_KEY = 'lcars.terminal.state';
+        let terminalUnreadCount = 0;
+        let terminalState = {
+            open: false,
+            maximized: false,
+            position: null    // { left, top } once user drags
+        };
+
+        function loadTerminalState() {
+            try {
+                const raw = localStorage.getItem(TERMINAL_STATE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    terminalState.open = !!parsed.open;
+                    terminalState.maximized = !!parsed.maximized;
+                    terminalState.position = parsed.position || null;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveTerminalState() {
+            try {
+                localStorage.setItem(TERMINAL_STATE_KEY, JSON.stringify(terminalState));
+            } catch (e) { /* ignore */ }
+        }
+
+        function applyTerminalState() {
+            const panel = document.getElementById('floating-console');
+            const pill = document.getElementById('console-toggle-pill');
+            const arrow = document.getElementById('pill-arrow');
+            if (!panel || !pill) return;
+
+            // Open / closed
+            panel.classList.toggle('hidden', !terminalState.open);
+            if (arrow) arrow.textContent = terminalState.open ? '▾' : '▸';
+
+            // Maximize
+            panel.classList.toggle('maximized', !!terminalState.maximized);
+
+            // Custom position (only honored when not maximized)
+            if (terminalState.position && !terminalState.maximized) {
+                applyTerminalPosition(terminalState.position.left, terminalState.position.top);
+            } else {
+                // Reset to default anchored position
+                panel.style.left = '';
+                panel.style.top = '';
+            }
+        }
+
+        function applyTerminalPosition(left, top) {
+            const panel = document.getElementById('floating-console');
+            if (!panel) return;
+            const rect = panel.getBoundingClientRect();
+            const w = rect.width || 520;
+            const h = rect.height || 400;
+            const maxLeft = Math.max(0, window.innerWidth  - w - 8);
+            const maxTop  = Math.max(0, window.innerHeight - h - 8);
+            const clampedLeft = Math.min(Math.max(0, left), maxLeft);
+            const clampedTop  = Math.min(Math.max(0, top),  maxTop);
+            panel.style.left = clampedLeft + 'px';
+            panel.style.top  = clampedTop  + 'px';
+            panel.style.right  = 'auto';
+            panel.style.bottom = 'auto';
+        }
+
+        function openFloatingTerminal() {
+            terminalState.open = true;
+            terminalUnreadCount = 0;
+            updateUnreadBadge();
+            applyTerminalState();
+            saveTerminalState();
+            const terminal = document.getElementById('terminal-content');
+            if (terminal) terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function closeFloatingTerminal(ev) {
+            if (ev) ev.stopPropagation();
+            terminalState.open = false;
+            applyTerminalState();
+            saveTerminalState();
+        }
+
+        function toggleFloatingTerminal() {
+            if (terminalState.open) closeFloatingTerminal();
+            else openFloatingTerminal();
+        }
+
+        function toggleTerminalMaximize(ev) {
+            if (ev) ev.stopPropagation();
+            terminalState.maximized = !terminalState.maximized;
+            // Maximize ignores custom position; clear it when un-maximizing too,
+            // so the panel settles back to its anchored corner cleanly.
+            if (terminalState.maximized) {
+                // keep stored position as-is so it can be restored later
+            }
+            applyTerminalState();
+            saveTerminalState();
+        }
+
+        function notifyTerminalActivity() {
+            if (terminalState.open) return;
+            terminalUnreadCount++;
+            updateUnreadBadge();
+            const pill = document.getElementById('console-toggle-pill');
+            if (pill) {
+                pill.classList.remove('pulse');
+                // force reflow so the animation can re-trigger
+                void pill.offsetWidth;
+                pill.classList.add('pulse');
+                setTimeout(() => pill.classList.remove('pulse'), 1900);
+            }
+        }
+
+        function updateUnreadBadge() {
+            const badge = document.getElementById('console-toggle-badge');
+            const pill = document.getElementById('console-toggle-pill');
+            if (!badge || !pill) return;
+            if (terminalUnreadCount > 0) {
+                badge.textContent = terminalUnreadCount > 99 ? '99+' : String(terminalUnreadCount);
+                badge.classList.remove('empty');
+                pill.classList.add('has-unread');
+            } else {
+                badge.textContent = '0';
+                badge.classList.add('empty');
+                pill.classList.remove('has-unread');
+            }
+        }
+
+        // ---- Drag support for the floating terminal ----
+        function initTerminalDrag() {
+            const panel  = document.getElementById('floating-console');
+            const header = document.getElementById('floating-console-header');
+            if (!panel || !header) return;
+
+            let dragging = false;
+            let startX = 0, startY = 0;
+            let originLeft = 0, originTop = 0;
+
+            header.addEventListener('mousedown', (e) => {
+                // Don't initiate drag from the header buttons
+                if (e.target.closest('.console-window-btn')) return;
+                if (terminalState.maximized) return;
+                dragging = true;
+                header.classList.add('dragging');
+                const rect = panel.getBoundingClientRect();
+                originLeft = rect.left;
+                originTop  = rect.top;
+                startX = e.clientX;
+                startY = e.clientY;
+                // Switch to absolute left/top before dragging
+                panel.style.left = originLeft + 'px';
+                panel.style.top  = originTop + 'px';
+                panel.style.right  = 'auto';
+                panel.style.bottom = 'auto';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!dragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                applyTerminalPosition(originLeft + dx, originTop + dy);
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!dragging) return;
+                dragging = false;
+                header.classList.remove('dragging');
+                const rect = panel.getBoundingClientRect();
+                terminalState.position = { left: rect.left, top: rect.top };
+                saveTerminalState();
+            });
+
+            // Re-clamp on viewport resize
+            window.addEventListener('resize', () => {
+                if (terminalState.position && !terminalState.maximized) {
+                    applyTerminalPosition(terminalState.position.left, terminalState.position.top);
+                }
+            });
+        }
+
+        // ---- Control "More ▾" dropdown ----
+        function toggleControlMore(ev) {
+            if (ev) ev.stopPropagation();
+            const menu = document.getElementById('control-more-menu');
+            if (menu) menu.classList.toggle('open');
+        }
+
+        function closeControlMore() {
+            const menu = document.getElementById('control-more-menu');
+            if (menu) menu.classList.remove('open');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('control-more-menu');
+            if (!menu || !menu.classList.contains('open')) return;
+            if (!e.target.closest('.control-more-wrapper')) closeControlMore();
+        });
 
         function clearTerminal() {
             const terminal = document.getElementById('terminal-content');
@@ -4563,6 +4915,18 @@
         // Keyboard Shortcuts
         // =====================================================
         document.addEventListener('keydown', (e) => {
+            // Ctrl+` = Toggle floating terminal
+            if (e.ctrlKey && (e.key === '`' || e.code === 'Backquote')) {
+                e.preventDefault();
+                toggleFloatingTerminal();
+                return;
+            }
+            // Esc = Collapse terminal (only if it's open)
+            if (e.key === 'Escape' && terminalState.open) {
+                e.preventDefault();
+                closeFloatingTerminal();
+                return;
+            }
             // Ctrl+R = Refresh
             if (e.ctrlKey && e.key === 'r') {
                 e.preventDefault();
@@ -5201,7 +5565,13 @@
 
             // Initialize stellar visualizations (canvas/SVG engines)
             setTimeout(() => initStellarVisualizations(), 400);
-            
+
+            // Restore floating terminal state (collapsed by default on first load)
+            loadTerminalState();
+            applyTerminalState();
+            initTerminalDrag();
+            updateUnreadBadge();
+
             // Check server and load initial data
             try {
                 await checkServerStatus();
@@ -5210,7 +5580,7 @@
                 setTimeout(() => {
                     addTerminalLine('INITIALIZATION', 'STARFLEET COMMAND INTERFACE ONLINE');
                     addTerminalLine('ANALYTICS', 'Real-time monitoring active - updating every second');
-                    addTerminalLine('SHORTCUTS', 'Ctrl+R=Refresh | Ctrl+K=Clear | Ctrl+H=Health | Ctrl+T=Tools');
+                    addTerminalLine('SHORTCUTS', 'Ctrl+R=Refresh | Ctrl+K=Clear | Ctrl+H=Health | Ctrl+T=Tools | Ctrl+`=Console | Esc=Hide');
                 }, 300);
             } catch (error) {
                 addTerminalLine('INITIALIZATION', 'WARNING: Server connection unstable', true);
