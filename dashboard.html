@@ -1582,47 +1582,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .lcars-container {
-                padding: 15px;
-            }
-            
-            .lcars-grid {
-                gap: 25px;
-            }
-            
-            .enterprise-title {
-                font-size: 2.2rem;
-                letter-spacing: 2px;
-            }
-
-            .lcars-panel {
-                border-radius: 20px 0 20px 0;
-            }
-
-            .control-grid {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .lcars-control-btn {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .enterprise-title {
-                font-size: 1.8rem;
-                letter-spacing: 1px;
-            }
-
-            .lcars-stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-        }
+        /* Responsive Design — see consolidated mobile layer at end of stylesheet */
 
         /* Audio Feedback Styles */
         .audio-feedback {
@@ -2478,6 +2438,236 @@
         /* Mobile fallback: card centered at bottom */
         @media (max-width: 720px) {
             .tutorial-card { width: calc(100vw - 24px); left: 12px !important; }
+        }
+
+        /* =====================================================
+           RESPONSIVE LAYER (placed last so it overrides every
+           base rule above for .nav-bar, .floating-console,
+           .console-toggle-pill, etc., regardless of source order)
+           ===================================================== */
+        @media (max-width: 768px) {
+            .lcars-container {
+                padding: 10px;
+            }
+
+            .lcars-header {
+                padding: 18px 20px;
+                margin-bottom: 18px;
+                border-radius: 16px 0 0 16px;
+            }
+            .lcars-header::before { width: 36px; }
+            .lcars-header::after  {
+                right: 6px;
+                width: 24px;
+                box-shadow:
+                    0 -12px 0 var(--lcars-dark-blue),
+                    0 12px 0 var(--lcars-dark-blue),
+                    0 -24px 0 var(--lcars-dark-blue),
+                    0 24px 0 var(--lcars-dark-blue);
+            }
+
+            .enterprise-title {
+                font-size: 2rem;
+                letter-spacing: 2px;
+                margin-bottom: 6px;
+            }
+            .enterprise-subtitle {
+                font-size: 1rem;
+                letter-spacing: 1.5px;
+                margin-bottom: 14px;
+            }
+
+            .starfleet-status {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .stardate { margin-left: 0; }
+
+            /* Single-column panel grid so cards never overflow at 375px */
+            .lcars-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                margin-bottom: 14px;
+            }
+
+            .lcars-panel { border-radius: 18px 0 18px 0; }
+            .lcars-panel::after { width: 36px; }
+            .lcars-panel:hover {
+                transform: none;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            }
+
+            .lcars-panel-header {
+                padding: 14px 18px 10px 18px;
+                gap: 10px;
+            }
+            .lcars-icon { width: 26px; height: 26px; }
+            .lcars-panel h2 {
+                font-size: 1.2rem;
+                letter-spacing: 1.5px;
+            }
+
+            .panel-content { padding: 16px; }
+            .lcars-tool-list { gap: 10px; }
+            .lcars-button { padding: 14px 18px; }
+            .lcars-button:hover {
+                transform: none;
+                box-shadow: 0 0 18px var(--lcars-orange);
+            }
+            .tool-name { font-size: 1rem; margin-bottom: 4px; }
+            .tool-description { font-size: 0.85rem; }
+
+            .lcars-stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 12px;
+            }
+            .lcars-stat-pod { padding: 14px; }
+            .stat-value { font-size: 1.5rem; }
+
+            .metric-tiles {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 10px;
+            }
+
+            .viz-grid {
+                grid-template-columns: 1fr;
+                padding: 14px;
+                gap: 12px;
+            }
+            .viz-card.wide,
+            .viz-card.full { grid-column: span 1; }
+
+            /* Nav bar: tighter spacing, hide visual dividers, allow clean wrap */
+            .nav-bar {
+                padding: 10px 12px;
+                gap: 6px;
+                margin-bottom: 16px;
+                border-radius: 12px;
+            }
+            .nav-label {
+                font-size: 0.65rem;
+                letter-spacing: 1.5px;
+                margin-right: 4px;
+            }
+            .nav-link {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                border-radius: 16px 0 16px 0;
+            }
+            .nav-divider { display: none; }
+
+            /* Control panel: shrink the right purple curve so it doesn't sit
+               under the buttons when the grid stacks vertically */
+            .lcars-control-panel {
+                padding: 12px 16px;
+                margin-top: 12px;
+                border-radius: 18px 0 18px 0;
+            }
+            .lcars-control-panel::after { width: 28px; }
+
+            .control-grid {
+                flex-direction: column;
+                gap: 10px;
+                padding-right: 22px;
+            }
+            .lcars-control-btn {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 0.95rem;
+                margin-bottom: 0;
+            }
+            .lcars-control-btn:hover {
+                transform: none;
+            }
+
+            /* Make the More-menu wrapper full width and align the dropdown
+               to the panel edges so it can't run off-screen */
+            .control-more-wrapper {
+                display: block;
+                width: 100%;
+            }
+            .control-more-menu {
+                left: 0;
+                right: 0;
+                min-width: 0;
+            }
+
+            .starfleet-footer {
+                padding: 24px 12px;
+                margin-top: 24px;
+            }
+        }
+
+        /* Phone-only layer: turn the floating console into a true bottom sheet
+           and keep the toggle pill clear of the More ▾ button stack */
+        @media (max-width: 600px) {
+            .floating-console {
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                height: 70vh;
+                max-height: 85vh;
+                border-radius: 20px 20px 0 0;
+                border-bottom: none;
+            }
+            .floating-console.maximized {
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            /* Hide the right-edge red curve so action buttons get the full row */
+            .floating-console::after { display: none; }
+            .floating-console-header,
+            .floating-console-output,
+            .floating-console-actions {
+                padding-right: 16px;
+            }
+
+            .console-toggle-pill {
+                right: 10px;
+                bottom: 10px;
+                padding: 8px 14px;
+                font-size: 0.7rem;
+                letter-spacing: 1.2px;
+                border-radius: 22px 4px 22px 4px;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .enterprise-title {
+                font-size: 1.6rem;
+                letter-spacing: 1px;
+            }
+            .enterprise-subtitle {
+                font-size: 0.9rem;
+                letter-spacing: 1px;
+            }
+
+            .lcars-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .stat-value { font-size: 1.3rem; }
+            .stat-label { font-size: 0.8rem; }
+
+            .metric-tiles {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .metric-tile { padding: 12px 8px; }
+            .metric-tile-value { font-size: 1.2rem; }
+
+            .nav-link {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
