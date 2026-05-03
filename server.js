@@ -1182,15 +1182,21 @@ const SEVERITIES = ['critical', 'high', 'medium', 'low', 'informational'];
 let _anthropicClient = null;
 function getAnthropic() {
   if (_anthropicClient) return _anthropicClient;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ||
-      !process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
-    return null;
+  // Prefer the Replit AI Integrations proxy (no user key required, billed to credits).
+  if (process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY &&
+      process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
+    _anthropicClient = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+    return _anthropicClient;
   }
-  _anthropicClient = new Anthropic({
-    apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
-    baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
-  });
-  return _anthropicClient;
+  // Fallback: standard Anthropic API key (direct billing on the user's Anthropic account).
+  if (process.env.ANTHROPIC_API_KEY) {
+    _anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    return _anthropicClient;
+  }
+  return null;
 }
 
 const TRIAGE_KIND_DESCRIPTIONS = {
