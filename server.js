@@ -110,12 +110,11 @@ function mcpRecord(ev) {
   return event;
 }
 function mcpComputeStatus() {
-  // CONNECTED: explicit transport flag is true OR we saw activity in the last 5 min.
-  // IDLE: we saw a client at some point but it's been quiet/disconnected.
-  // NEVER: the MCP transport has never seen a client handshake.
-  const FIVE_MIN = 5 * 60 * 1000;
-  const recent = mcpActivity.lastSeenAt && (Date.now() - mcpActivity.lastSeenAt) < FIVE_MIN;
-  if (mcpActivity.connected || recent) return 'CONNECTED';
+  // CONNECTED: the transport reports an active client (set true on
+  //   `oninitialized`, false on `onclose`).
+  // IDLE: a client has handshook at least once but is no longer connected.
+  // NEVER: no MCP client has ever connected since this process started.
+  if (mcpActivity.connected) return 'CONNECTED';
   if (mcpActivity.initializedAt) return 'IDLE';
   return 'NEVER';
 }
@@ -1067,17 +1066,20 @@ app.get('/api/mcp/status', (req, res) => {
 });
 app.get('/api/mcp/activity', (req, res) => {
   const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 100));
-  const since = parseInt(req.query.since, 10) || 0;
-  // Return the OLDEST unseen events first so the client never permanently
-  // drops events during a burst — it just polls again with the new cursor.
-  const unseen = mcpActivity.events.filter((e) => e.id > since);
+  // `since` is a millisecond timestamp; return events strictly newer than it.
+  // We page by oldest-unseen-first so a polling client can drain bursts via
+  // the returned `cursor` without permanently losing events.
+  const sinceMs = parseInt(req.query.since, 10) || 0;
+  const unseen = mcpActivity.events.filter((e) => e.ts > sinceMs);
   const page = unseen.slice(0, limit);
-  const nextCursor = page.length ? page[page.length - 1].id : since;
+  const nextCursor = page.length
+    ? page[page.length - 1].ts
+    : (mcpActivity.lastSeenAt || sinceMs);
   res.json({
     events: page.slice().reverse(),    // newest-first for UI insertion
     cursor: nextCursor,
     hasMore: unseen.length > page.length,
-    oldestRetainedId: mcpActivity.events.length ? mcpActivity.events[0].id : 0,
+    oldestRetainedTs: mcpActivity.events.length ? mcpActivity.events[0].ts : 0,
     serverTime: Date.now(),
   });
 });
@@ -1616,11 +1618,22 @@ server.oninitialized = () => {
 };
 
 const _mcpTransport = new StdioServerTransport();
+const _markDisconnected = () => {
+  if (mcpActivity.connected) {
+    mcpActivity.connected = false;
+    logger.info('MCP client disconnected');
+  }
+};
 const _origOnClose = _mcpTransport.onclose;
 _mcpTransport.onclose = () => {
-  mcpActivity.connected = false;
+  _markDisconnected();
   if (typeof _origOnClose === 'function') _origOnClose();
 };
+// StdioServerTransport's `onclose` only fires on explicit close(); stdin EOF
+// (the actual disconnect signal for an MCP stdio client) doesn't reach it.
+// Listen for stdin end/close so the Activity panel can flip CONNECTED→IDLE.
+process.stdin.on('end',   _markDisconnected);
+process.stdin.on('close', _markDisconnected);
 server.connect(_mcpTransport);
 logger.info('Enhanced MCP Server ready!');
 
