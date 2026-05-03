@@ -402,9 +402,11 @@ async function mountTriage(opts) {
 
     const hint = document.createElement('span');
     hint.className = 'triage-hint';
-    hint.textContent = status.configured
-        ? `via ${status.provider || 'anthropic'} · ${status.model || ''}`
-        : 'AI triage unavailable — configure an LLM key to enable.';
+    if (status.configured) {
+        hint.textContent = `via ${status.provider || 'anthropic'} · ${status.model || ''}`;
+    } else {
+        hint.innerHTML = `AI triage unavailable — <a href="https://docs.replit.com/replit-workspace/integrations" target="_blank" rel="noopener" style="color:#cc99ff;text-decoration:underline;">configure the Anthropic integration</a> (or set <code>ANTHROPIC_API_KEY</code>) to enable.`;
+    }
     launcher.appendChild(hint);
     host.appendChild(launcher);
 
@@ -431,8 +433,24 @@ async function mountTriage(opts) {
                 </div>
             </div>`;
         try {
-            const data = await apiCall('/api/triage', 'POST', { kind: opts.kind, payload });
-            if (!data.success) throw new Error(data.error || 'Triage failed');
+            const resp = await fetch('/api/triage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kind: opts.kind, payload })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data.success) {
+                if (resp.status === 502 && data && data.raw) {
+                    result.innerHTML = `
+                        <div class="triage-result">
+                            <div class="triage-error">⚠ The model returned malformed JSON. Showing raw output below — please retry.</div>
+                            <pre class="triage-section" style="white-space:pre-wrap;max-height:320px;overflow:auto;margin-top:10px;">${_triageEsc(data.raw)}</pre>
+                        </div>`;
+                    playErrorSound();
+                    return;
+                }
+                throw new Error((data && data.error) || `HTTP ${resp.status}: ${resp.statusText}`);
+            }
             const t = data.triage;
             result.innerHTML = `
                 <div class="triage-result">

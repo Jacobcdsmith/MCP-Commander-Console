@@ -2670,6 +2670,42 @@
                 font-size: 0.75rem;
             }
         }
+    /* AI Triage Panel (security testing) */
+    .triage-launcher{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+    .triage-btn{background:linear-gradient(45deg,#4a0072,#6a00a8);border:2px solid #cc99ff;border-radius:18px 0 18px 0;padding:11px 20px;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s}
+    .triage-btn:hover:not(:disabled){transform:translateY(-2px);border-color:#ffd700;box-shadow:0 0 22px rgba(204,153,255,.55)}
+    .triage-btn:disabled{opacity:.45;cursor:not-allowed;border-color:#555}
+    .triage-hint{font-family:'Rajdhani',sans-serif;font-size:.8rem;color:#888;letter-spacing:.6px}
+    .triage-hint a{color:#cc99ff;text-decoration:underline}
+    .triage-result{margin-top:14px;background:linear-gradient(135deg,rgba(20,0,40,.85),rgba(40,0,60,.7));border:2px solid #cc99ff;border-radius:14px;padding:16px 18px;position:relative;box-shadow:inset 0 0 22px rgba(204,153,255,.12)}
+    .triage-result::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#cc99ff,#6a00a8,#cc99ff);background-size:200% 100%;animation:triageStrip 4s linear infinite;border-radius:14px 14px 0 0}
+    @keyframes triageStrip{0%{background-position:0 0}100%{background-position:200% 0}}
+    .triage-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+    .triage-header-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:#e0c8ff;text-transform:uppercase;letter-spacing:1.5px;text-shadow:0 0 8px #cc99ff}
+    .triage-header-meta{font-family:'Rajdhani',sans-serif;font-size:.78rem;color:#aa88cc;margin-left:auto}
+    .triage-summary{font-family:'Rajdhani',sans-serif;font-size:.95rem;color:#99ccff;line-height:1.4;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed rgba(204,153,255,.3)}
+    .triage-items{display:flex;flex-direction:column;gap:10px}
+    .triage-item{background:rgba(0,0,20,.55);border:1px solid rgba(204,153,255,.25);border-radius:10px;padding:12px 14px}
+    .triage-item-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+    .triage-item-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.98rem;color:#fff;flex:1;min-width:0}
+    .triage-section{font-family:'Rajdhani',sans-serif;font-size:.88rem;line-height:1.45;color:#99ccff;margin-top:4px}
+    .triage-section-label{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;color:#cc99ff;text-transform:uppercase;letter-spacing:1.3px;margin-right:6px}
+    .severity-pill{display:inline-block;padding:3px 11px;border-radius:14px;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;border:1px solid currentColor;white-space:nowrap}
+    .severity-critical{color:#ff3333;background:rgba(255,51,51,.18);box-shadow:0 0 12px rgba(255,51,51,.45)}
+    .severity-high{color:#ff9900;background:rgba(255,153,0,.18)}
+    .severity-medium{color:#ffcc33;background:rgba(255,204,51,.16)}
+    .severity-low{color:#ffff99;background:rgba(255,255,153,.13)}
+    .severity-informational{color:#00d4ff;background:rgba(0,212,255,.13)}
+    .triage-actions{margin-top:12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .triage-copy-btn{background:transparent;border:1px solid #cc99ff;color:#cc99ff;border-radius:12px;padding:6px 14px;font-family:'Rajdhani',sans-serif;font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s}
+    .triage-copy-btn:hover{background:rgba(204,153,255,.18);color:#fff}
+    .triage-loading{display:flex;align-items:center;gap:12px;padding:14px;color:#cc99ff;font-family:'Rajdhani',sans-serif;font-size:.95rem;text-transform:uppercase;letter-spacing:1px}
+    .triage-loading-dot{width:10px;height:10px;background:#cc99ff;border-radius:50%;animation:triagePulse 1.1s ease-in-out infinite}
+    .triage-loading-dot:nth-child(2){animation-delay:.18s}
+    .triage-loading-dot:nth-child(3){animation-delay:.36s}
+    @keyframes triagePulse{0%,100%{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+    .triage-error{color:#ff5555;font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:10px 14px;border:1px solid #ff5555;border-radius:8px;background:rgba(255,0,0,.12)}
+    @media (prefers-reduced-motion: reduce){.triage-result::before,.triage-loading-dot{animation:none !important}}
     </style>
 </head>
 <body>
@@ -3361,10 +3397,6 @@
                             <div class="tool-name">⚡ Quick Scan (API)</div>
                             <div class="tool-description">Automated /api/security/scan endpoint</div>
                         </div>
-                        <div class="lcars-button sec-btn" onclick="triageLastQuickScan()" style="border-color:#cc99ff;">
-                            <div class="tool-name" style="color:#e0c8ff;">🤖 AI Triage Last Scan</div>
-                            <div class="tool-description">Plain-English summary of the last quick scan</div>
-                        </div>
                         <div class="lcars-button sec-btn" onclick="promptHttpHeadersCheck()">
                             <div class="tool-name">🔍 HTTP Headers Check</div>
                             <div class="tool-description">Analyze security headers of any URL</div>
@@ -3405,6 +3437,7 @@
                             <div class="tool-name">📂 World-Writable Files</div>
                             <div class="tool-description">Check for over-permissive files</div>
                         </div>
+                        <div id="security-triage-mount" style="grid-column:1/-1;"></div>
                         <div class="lcars-button sec-btn" onclick="executeCommand('run_command', {command: 'find / -maxdepth 5 -perm /4000 -type f 2>/dev/null | head -20 || echo \"None found\"'})">
                             <div class="tool-name">⚙️ SUID/SGID Files</div>
                             <div class="tool-description">Privileged binary detection</div>
@@ -6807,37 +6840,128 @@
             }
         }
 
-        async function triageLastQuickScan() {
-            if (!_lastQuickScan) {
-                addTerminalLine('⚠ NO SCAN TO TRIAGE', 'Run "Quick Scan (API)" first, then click triage.');
+        function _trEsc(s){const d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+        let _triageStatusCacheDash = null;
+        async function _getTriageStatusDash(){
+            if (_triageStatusCacheDash) return _triageStatusCacheDash;
+            try { _triageStatusCacheDash = await (await fetch('/api/triage/status')).json(); }
+            catch { _triageStatusCacheDash = { configured:false }; }
+            return _triageStatusCacheDash;
+        }
+        function _triageMd(t){
+            const lines = [
+                `# AI Triage — Security Audit`,
+                ``,
+                `**Overall severity:** ${t.overall_severity}`,
+                ``,
+                t.summary ? `> ${t.summary}` : '',
+                ``,
+            ];
+            (t.items||[]).forEach((it,i)=>{
+                lines.push(`## ${i+1}. [${(it.severity||'').toUpperCase()}] ${it.title}`,
+                           ``, `- **What:** ${it.what}`, `- **Why:** ${it.why}`,
+                           `- **Next step:** ${it.next_step}`, ``);
+            });
+            return lines.join('\n').trim();
+        }
+        function _renderTriageItems(t){
+            return (t.items||[]).map(it=>`
+                <div class="triage-item">
+                  <div class="triage-item-head">
+                    <span class="severity-pill severity-${_trEsc(it.severity)}">${_trEsc(it.severity)}</span>
+                    <span class="triage-item-title">${_trEsc(it.title)}</span>
+                  </div>
+                  <div class="triage-section"><span class="triage-section-label">What</span>${_trEsc(it.what)}</div>
+                  <div class="triage-section"><span class="triage-section-label">Why</span>${_trEsc(it.why)}</div>
+                  <div class="triage-section"><span class="triage-section-label">Next step</span>${_trEsc(it.next_step)}</div>
+                </div>`).join('') || '<div class="triage-section">No items returned.</div>';
+        }
+        async function _ensureTriageMount(){
+            const mount = document.getElementById('security-triage-mount');
+            if (!mount) return null;
+            if (mount.dataset.ready === '1') return mount;
+            mount.dataset.ready = '1';
+            const status = await _getTriageStatusDash();
+            const launcher = document.createElement('div');
+            launcher.className = 'triage-launcher';
+            const btn = document.createElement('button');
+            btn.id = 'security-triage-btn';
+            btn.className = 'triage-btn';
+            btn.type = 'button';
+            btn.innerHTML = '🤖 AI Triage Last Scan';
+            const hint = document.createElement('span');
+            hint.className = 'triage-hint';
+            if (status.configured){
+                hint.textContent = `via ${status.provider||'anthropic'} · ${status.model||''} — run Quick Scan first, then click to triage.`;
+            } else {
+                btn.disabled = true;
+                btn.title = 'AI triage unavailable — Anthropic integration not configured';
+                hint.innerHTML = `AI triage unavailable — <a href="https://docs.replit.com/replit-workspace/integrations" target="_blank" rel="noopener">configure the Anthropic integration</a> (or set <code>ANTHROPIC_API_KEY</code>) to enable.`;
+            }
+            launcher.appendChild(btn); launcher.appendChild(hint);
+            mount.appendChild(launcher);
+            const slot = document.createElement('div');
+            slot.id = 'security-triage-slot';
+            mount.appendChild(slot);
+            btn.addEventListener('click', triageLastQuickScan);
+            return mount;
+        }
+        async function triageLastQuickScan(){
+            await _ensureTriageMount();
+            const slot = document.getElementById('security-triage-slot');
+            const btn = document.getElementById('security-triage-btn');
+            const status = await _getTriageStatusDash();
+            if (!status.configured){
+                if (slot) slot.innerHTML = `<div class="triage-result"><div class="triage-error">AI triage is not configured on this server.</div></div>`;
                 return;
             }
-            addTerminalLine('🤖 AI TRIAGE', 'Asking Claude to triage the last quick scan…');
+            if (!_lastQuickScan){
+                if (slot) slot.innerHTML = `<div class="triage-result"><div class="triage-error">Run "Quick Scan (API)" first — there's nothing to triage yet.</div></div>`;
+                return;
+            }
+            if (btn) btn.disabled = true;
+            slot.innerHTML = `<div class="triage-result"><div class="triage-loading"><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span>Triaging finding with AI…</span></div></div>`;
             try {
-                const r = await fetch('/api/triage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ kind: 'audit', payload: _lastQuickScan })
+                const resp = await fetch('/api/triage', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({kind:'audit', payload:_lastQuickScan})
                 });
-                const j = await r.json();
-                if (!j.success) {
-                    addTerminalLine('❌ TRIAGE FAILED', j.error || 'Unknown error', true);
-                    return;
+                const data = await resp.json().catch(()=>({}));
+                if (!resp.ok || !data.success){
+                    if (resp.status === 502 && data && data.raw){
+                        slot.innerHTML = `<div class="triage-result"><div class="triage-error">⚠ The model returned malformed JSON. Showing raw output below — please retry.</div><pre class="triage-section" style="white-space:pre-wrap;max-height:320px;overflow:auto;margin-top:10px;">${_trEsc(data.raw)}</pre></div>`;
+                        return;
+                    }
+                    throw new Error((data && data.error) || `HTTP ${resp.status}: ${resp.statusText}`);
                 }
-                const t = j.triage;
-                let txt = `Overall: [${t.overall_severity.toUpperCase()}]  (${j.model} · ${j.durationMs} ms)\n`;
-                if (t.summary) txt += `\n${t.summary}\n`;
-                (t.items || []).forEach((it, i) => {
-                    txt += `\n${i + 1}. [${it.severity.toUpperCase()}] ${it.title}\n`;
-                    txt += `   What:      ${it.what}\n`;
-                    txt += `   Why:       ${it.why}\n`;
-                    txt += `   Next step: ${it.next_step}\n`;
+                const t = data.triage;
+                slot.innerHTML = `
+                    <div class="triage-result">
+                        <div class="triage-header">
+                            <span class="severity-pill severity-${_trEsc(t.overall_severity)}">${_trEsc(t.overall_severity)}</span>
+                            <span class="triage-header-title">AI Triage — Security Audit</span>
+                            <span class="triage-header-meta">${_trEsc(data.model||'')} · ${data.durationMs||0} ms</span>
+                        </div>
+                        ${t.summary ? `<div class="triage-summary">${_trEsc(t.summary)}</div>` : ''}
+                        <div class="triage-items">${_renderTriageItems(t)}</div>
+                        <div class="triage-actions">
+                            <button class="triage-copy-btn" type="button" id="security-triage-copy">Copy summary</button>
+                        </div>
+                    </div>`;
+                const md = _triageMd(t);
+                const copyBtn = document.getElementById('security-triage-copy');
+                copyBtn.addEventListener('click', async () => {
+                    try { await navigator.clipboard.writeText(md); copyBtn.textContent='Copied ✓'; setTimeout(()=>{copyBtn.textContent='Copy summary';},1500); }
+                    catch { copyBtn.textContent='Copy failed'; }
                 });
-                addTerminalLine('🤖 AI TRIAGE COMPLETE', txt);
             } catch (e) {
-                addTerminalLine('❌ TRIAGE FAILED', e.message, true);
+                slot.innerHTML = `<div class="triage-result"><div class="triage-error">${_trEsc(e.message||'Triage failed')}</div></div>`;
+            } finally {
+                if (btn) btn.disabled = !status.configured;
             }
         }
+        document.addEventListener('DOMContentLoaded', () => { _ensureTriageMount(); });
 
         async function promptHttpHeadersCheck() {
             const url = prompt('URL to check security headers:', 'https://example.com');
