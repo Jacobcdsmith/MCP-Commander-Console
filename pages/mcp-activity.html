@@ -309,7 +309,7 @@
 
     <script src="/pages/shared/lcars-core.js"></script>
     <script>
-        // Cursor is a millisecond timestamp; server returns events with ts > cursor.
+        // Cursor is an event id; server returns events with id > cursor.
         let lastCursor = 0;
         let filter = 'all';
         let topWindow = '1h';

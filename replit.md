@@ -37,7 +37,7 @@ PORT=5000 node server.js
 | `POST /api/tools/execute` | Execute any MCP tool |
 | `GET /api/security/scan` | Automated security scan (audit + ports + sensitive files) |
 | `GET /api/mcp/status` | MCP client status (CONNECTED/IDLE/NEVER), clientInfo, totals |
-| `GET /api/mcp/activity` | Cursor-paginated MCP/REST activity ring (oldest-unseen-first, with `hasMore`) |
+| `GET /api/mcp/activity` | Cursor-paginated MCP/REST activity ring (`since`=event id, oldest-unseen-first, with `hasMore`) |
 | `GET /api/mcp/top-tools` | Windowed (`5m`/`1h`/`24h`) MCP `tools/call` leaderboard |
 | `GET /favicon.ico` | Suppressed (204) |
 

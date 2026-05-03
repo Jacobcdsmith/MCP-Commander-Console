@@ -1066,20 +1066,21 @@ app.get('/api/mcp/status', (req, res) => {
 });
 app.get('/api/mcp/activity', (req, res) => {
   const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 100));
-  // `since` is a millisecond timestamp; return events strictly newer than it.
-  // We page by oldest-unseen-first so a polling client can drain bursts via
-  // the returned `cursor` without permanently losing events.
-  const sinceMs = parseInt(req.query.since, 10) || 0;
-  const unseen = mcpActivity.events.filter((e) => e.ts > sinceMs);
+  // `since` is a monotonically-increasing event id (the `cursor` from a prior
+  // response). Id-based — not timestamp-based — so events created in the same
+  // millisecond can never be skipped. Oldest-unseen-first paging lets a
+  // polling client drain bursts without losing events.
+  const sinceId = parseInt(req.query.since, 10) || 0;
+  const unseen = mcpActivity.events.filter((e) => e.id > sinceId);
   const page = unseen.slice(0, limit);
   const nextCursor = page.length
-    ? page[page.length - 1].ts
-    : (mcpActivity.lastSeenAt || sinceMs);
+    ? page[page.length - 1].id
+    : Math.max(sinceId, mcpActivity.nextId - 1);
   res.json({
     events: page.slice().reverse(),    // newest-first for UI insertion
     cursor: nextCursor,
     hasMore: unseen.length > page.length,
-    oldestRetainedTs: mcpActivity.events.length ? mcpActivity.events[0].ts : 0,
+    oldestRetainedId: mcpActivity.events.length ? mcpActivity.events[0].id : 0,
     serverTime: Date.now(),
   });
 });
