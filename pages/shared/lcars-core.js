@@ -312,6 +312,163 @@ function attachRippleFeedback() {
 }
 
 // =====================================================
+// AI-Assisted Findings Triage
+// =====================================================
+let _triageStatusCache = null;
+async function getTriageStatus() {
+    if (_triageStatusCache) return _triageStatusCache;
+    try {
+        _triageStatusCache = await apiCall('/api/triage/status');
+    } catch (e) {
+        _triageStatusCache = { configured: false };
+    }
+    return _triageStatusCache;
+}
+
+function _triageEsc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+}
+
+function _triageRenderItems(triage) {
+    const items = (triage.items || []).map((it) => `
+        <div class="triage-item">
+            <div class="triage-item-head">
+                <span class="severity-pill severity-${_triageEsc(it.severity)}">${_triageEsc(it.severity)}</span>
+                <span class="triage-item-title">${_triageEsc(it.title)}</span>
+            </div>
+            <div class="triage-section"><span class="triage-section-label">What</span>${_triageEsc(it.what)}</div>
+            <div class="triage-section"><span class="triage-section-label">Why</span>${_triageEsc(it.why)}</div>
+            <div class="triage-section"><span class="triage-section-label">Next step</span>${_triageEsc(it.next_step)}</div>
+        </div>
+    `).join('');
+    return `<div class="triage-items">${items || '<div class="triage-section">No items returned.</div>'}</div>`;
+}
+
+function _triageToMarkdown(triage, kind) {
+    const lines = [
+        `# AI Triage — ${String(kind || '').toUpperCase()}`,
+        ``,
+        `**Overall severity:** ${triage.overall_severity}`,
+        ``,
+        triage.summary ? `> ${triage.summary}` : '',
+        ``,
+    ];
+    (triage.items || []).forEach((it, i) => {
+        lines.push(`## ${i + 1}. [${(it.severity || '').toUpperCase()}] ${it.title}`);
+        lines.push(`**What:** ${it.what}`);
+        lines.push(`**Why:** ${it.why}`);
+        lines.push(`**Next step:** ${it.next_step}`);
+        lines.push(``);
+    });
+    return lines.join('\n');
+}
+
+/**
+ * Mount a "Triage with AI" affordance for a finding.
+ *
+ * @param {Object} opts
+ * @param {string} opts.containerId   - id of the result container we live below
+ * @param {string} opts.kind          - 'inject'|'subdomain'|'portscan'|'auth'|'audit'
+ * @param {Function} opts.getPayload  - returns the raw scan JSON to triage (or null when nothing to triage)
+ * @param {string} [opts.label]       - button label override
+ */
+async function mountTriage(opts) {
+    const container = document.getElementById(opts.containerId);
+    if (!container) return;
+    const status = await getTriageStatus();
+
+    // Wrapper: launcher + result panel, both reused per-click.
+    let host = container.querySelector('.triage-host');
+    if (!host) {
+        host = document.createElement('div');
+        host.className = 'triage-host';
+        container.appendChild(host);
+    }
+    host.innerHTML = '';
+
+    const launcher = document.createElement('div');
+    launcher.className = 'triage-launcher';
+    const btn = document.createElement('button');
+    btn.className = 'triage-btn';
+    btn.type = 'button';
+    btn.innerHTML = `🤖 ${opts.label || 'Triage with AI'}`;
+    if (!status.configured) {
+        btn.disabled = true;
+        btn.title = 'Configure an LLM key to enable AI triage';
+    }
+    launcher.appendChild(btn);
+
+    const hint = document.createElement('span');
+    hint.className = 'triage-hint';
+    hint.textContent = status.configured
+        ? `via ${status.provider || 'anthropic'} · ${status.model || ''}`
+        : 'AI triage unavailable — configure an LLM key to enable.';
+    launcher.appendChild(hint);
+    host.appendChild(launcher);
+
+    const result = document.createElement('div');
+    result.className = 'triage-result-slot';
+    host.appendChild(result);
+
+    btn.addEventListener('click', async () => {
+        if (btn.disabled) return;
+        const payload = (typeof opts.getPayload === 'function') ? opts.getPayload() : null;
+        if (payload == null) {
+            result.innerHTML = `<div class="triage-error">Run a scan first — there's nothing to triage yet.</div>`;
+            return;
+        }
+        playBeep(660, 0.06);
+        btn.disabled = true;
+        result.innerHTML = `
+            <div class="triage-result">
+                <div class="triage-loading">
+                    <span class="triage-loading-dot"></span>
+                    <span class="triage-loading-dot"></span>
+                    <span class="triage-loading-dot"></span>
+                    <span>Triaging finding with AI…</span>
+                </div>
+            </div>`;
+        try {
+            const data = await apiCall('/api/triage', 'POST', { kind: opts.kind, payload });
+            if (!data.success) throw new Error(data.error || 'Triage failed');
+            const t = data.triage;
+            result.innerHTML = `
+                <div class="triage-result">
+                    <div class="triage-header">
+                        <span class="severity-pill severity-${_triageEsc(t.overall_severity)}">${_triageEsc(t.overall_severity)}</span>
+                        <span class="triage-header-title">AI Triage</span>
+                        <span class="triage-header-meta">${_triageEsc(data.model || '')} · ${data.durationMs || 0} ms</span>
+                    </div>
+                    ${t.summary ? `<div class="triage-summary">${_triageEsc(t.summary)}</div>` : ''}
+                    ${_triageRenderItems(t)}
+                    <div class="triage-actions">
+                        <button class="triage-copy-btn" type="button">Copy summary</button>
+                    </div>
+                </div>`;
+            const copyBtn = result.querySelector('.triage-copy-btn');
+            const md = _triageToMarkdown(t, opts.kind);
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(md);
+                    copyBtn.textContent = 'Copied ✓';
+                    setTimeout(() => { copyBtn.textContent = 'Copy summary'; }, 1500);
+                } catch {
+                    copyBtn.textContent = 'Copy failed';
+                }
+            });
+            playSuccessSound();
+        } catch (e) {
+            result.innerHTML = `<div class="triage-error">${_triageEsc(e.message || 'Triage failed')}</div>`;
+            playErrorSound();
+        } finally {
+            btn.disabled = !status.configured ? true : false;
+        }
+    });
+}
+
+// =====================================================
 // Initialization
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {

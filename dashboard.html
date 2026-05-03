@@ -3361,6 +3361,10 @@
                             <div class="tool-name">⚡ Quick Scan (API)</div>
                             <div class="tool-description">Automated /api/security/scan endpoint</div>
                         </div>
+                        <div class="lcars-button sec-btn" onclick="triageLastQuickScan()" style="border-color:#cc99ff;">
+                            <div class="tool-name" style="color:#e0c8ff;">🤖 AI Triage Last Scan</div>
+                            <div class="tool-description">Plain-English summary of the last quick scan</div>
+                        </div>
                         <div class="lcars-button sec-btn" onclick="promptHttpHeadersCheck()">
                             <div class="tool-name">🔍 HTTP Headers Check</div>
                             <div class="tool-description">Analyze security headers of any URL</div>
@@ -6785,18 +6789,53 @@
         // Security Testing Functions
         // =====================================================
 
+        let _lastQuickScan = null;
         async function runQuickSecurityScan() {
             addTerminalLine('⚡ QUICK SECURITY SCAN', 'Running automated /api/security/scan...');
             try {
                 const r = await fetch('/api/security/scan');
                 const data = await r.json();
+                _lastQuickScan = data;
                 addTerminalLine('🛡️ SECURITY SCAN COMPLETE',
                     `Timestamp: ${data.timestamp}\n\n` +
                     `=== AUDIT ===\n${data.audit}\n\n` +
                     `=== OPEN PORTS ===\n${data.ports}\n\n` +
-                    `=== SENSITIVE FILES ===\n${data.sensitive}`);
+                    `=== SENSITIVE FILES ===\n${data.sensitive}\n\n` +
+                    `Tip: click "🤖 AI Triage Last Scan" for a plain-English summary.`);
             } catch (e) {
                 addTerminalLine('❌ SCAN FAILED', e.message, true);
+            }
+        }
+
+        async function triageLastQuickScan() {
+            if (!_lastQuickScan) {
+                addTerminalLine('⚠ NO SCAN TO TRIAGE', 'Run "Quick Scan (API)" first, then click triage.');
+                return;
+            }
+            addTerminalLine('🤖 AI TRIAGE', 'Asking Claude to triage the last quick scan…');
+            try {
+                const r = await fetch('/api/triage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ kind: 'audit', payload: _lastQuickScan })
+                });
+                const j = await r.json();
+                if (!j.success) {
+                    addTerminalLine('❌ TRIAGE FAILED', j.error || 'Unknown error', true);
+                    return;
+                }
+                const t = j.triage;
+                let txt = `Overall: [${t.overall_severity.toUpperCase()}]  (${j.model} · ${j.durationMs} ms)\n`;
+                if (t.summary) txt += `\n${t.summary}\n`;
+                (t.items || []).forEach((it, i) => {
+                    txt += `\n${i + 1}. [${it.severity.toUpperCase()}] ${it.title}\n`;
+                    txt += `   What:      ${it.what}\n`;
+                    txt += `   Why:       ${it.why}\n`;
+                    txt += `   Next step: ${it.next_step}\n`;
+                });
+                addTerminalLine('🤖 AI TRIAGE COMPLETE', txt);
+            } catch (e) {
+                addTerminalLine('❌ TRIAGE FAILED', e.message, true);
             }
         }
 

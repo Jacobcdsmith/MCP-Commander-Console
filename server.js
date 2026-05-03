@@ -9,6 +9,7 @@ import os from "os";
 import express from "express";
 import cors from "cors";
 import { fileURLToPath } from "url";
+import Anthropic from "@anthropic-ai/sdk";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1166,6 +1167,183 @@ app.get('/api/security/scan', async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── AI-ASSISTED TRIAGE ─────────────────────────────────────────────────────
+// Sends a Red Team / Security Audit finding to Claude and returns a structured
+// plain-English summary: per-item severity, what it means, why it matters,
+// recommended next step. Uses the Replit AI Integrations Anthropic proxy
+// (env vars auto-populated; no user API key required).
+const TRIAGE_KINDS = new Set(['inject', 'subdomain', 'portscan', 'auth', 'audit']);
+const TRIAGE_MODEL = 'claude-sonnet-4-6';
+const SEVERITIES = ['critical', 'high', 'medium', 'low', 'informational'];
+
+let _anthropicClient = null;
+function getAnthropic() {
+  if (_anthropicClient) return _anthropicClient;
+  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ||
+      !process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
+    return null;
+  }
+  _anthropicClient = new Anthropic({
+    apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+    baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+  });
+  return _anthropicClient;
+}
+
+const TRIAGE_KIND_DESCRIPTIONS = {
+  inject: 'Web injection probe results (SQL injection / XSS / command injection). Each item has a label, payload, HTTP status, body snippet, and a heuristic `vulnerable` flag. A "vulnerable" signal is heuristic — error string match or HTTP 500 — not confirmed exploitability.',
+  subdomain: 'DNS subdomain enumeration. Resolved subdomains may indicate live hosts or attack surface that the operator may not realize is exposed.',
+  portscan: 'TCP port scan against a single host. Open ports — especially database, admin, or remote-access ports — should be flagged.',
+  auth: 'Credential-stuffing simulation against a login endpoint. A "hit" is any non-401/403/429 response — heuristic, not confirmed compromise. Any hit at all is worth highlighting.',
+  audit: 'Local security audit of this server: open ports, sensitive files (.env / *.key / *.pem), and config issues. Output is text from shell scans.',
+};
+
+function buildTriagePrompt(kind, payload) {
+  const desc = TRIAGE_KIND_DESCRIPTIONS[kind] || 'Security finding.';
+  // Bound the payload so we never send a runaway blob to the model.
+  const payloadText = JSON.stringify(payload, null, 2);
+  const trimmed = payloadText.length > 18000
+    ? payloadText.slice(0, 18000) + '\n…[truncated for length]'
+    : payloadText;
+  return `You are a senior security analyst triaging output from an automated red-team / security-audit tool.
+
+Tool kind: ${kind}
+Tool description: ${desc}
+
+Raw tool output (JSON or text):
+\`\`\`
+${trimmed}
+\`\`\`
+
+Produce a triage summary as STRICT JSON ONLY (no prose before or after, no markdown code fence). Schema:
+
+{
+  "overall_severity": "critical" | "high" | "medium" | "low" | "informational",
+  "summary": "<one short sentence summarizing the whole finding>",
+  "items": [
+    {
+      "severity": "critical" | "high" | "medium" | "low" | "informational",
+      "title": "<short title, <= 80 chars>",
+      "what": "<1-2 sentences in plain English: what was actually observed>",
+      "why":  "<1-2 sentences: why an operator should care>",
+      "next_step": "<1 concrete recommended action>"
+    }
+  ]
+}
+
+Rules:
+- Return at most 8 items. Prioritize the most severe / most actionable. If there is nothing notable, return a single informational item that says so.
+- Items MUST be sorted most-severe first.
+- Use "informational" for clean / no-finding results — never invent risk that the data does not support.
+- Be honest about heuristics: if a signal is weak, say so in "what".
+- No backticks, no Markdown, no commentary outside the JSON object.`;
+}
+
+function clampSeverity(s) {
+  const v = String(s || '').toLowerCase().trim();
+  return SEVERITIES.includes(v) ? v : 'informational';
+}
+
+function normalizeTriage(raw) {
+  if (!raw || typeof raw !== 'object') throw new Error('model returned non-object');
+  const items = Array.isArray(raw.items) ? raw.items.slice(0, 8) : [];
+  const cleanItems = items.map((it) => ({
+    severity: clampSeverity(it && it.severity),
+    title: String(it?.title || 'Untitled').slice(0, 200),
+    what: String(it?.what || '').slice(0, 1200),
+    why: String(it?.why || '').slice(0, 1200),
+    next_step: String(it?.next_step || '').slice(0, 800),
+  }));
+  // Re-sort defensively (model is asked to do this but we trust nothing).
+  const order = Object.fromEntries(SEVERITIES.map((s, i) => [s, i]));
+  cleanItems.sort((a, b) => order[a.severity] - order[b.severity]);
+  return {
+    overall_severity: clampSeverity(raw.overall_severity),
+    summary: String(raw.summary || '').slice(0, 500),
+    items: cleanItems,
+  };
+}
+
+function extractJson(text) {
+  const t = String(text || '').trim();
+  // Strip ```json fences if the model sneaks them in.
+  const fenced = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) return JSON.parse(fenced[1]);
+  // Otherwise find the first { ... last } pair.
+  const first = t.indexOf('{');
+  const last = t.lastIndexOf('}');
+  if (first >= 0 && last > first) return JSON.parse(t.slice(first, last + 1));
+  return JSON.parse(t);
+}
+
+app.get('/api/triage/status', (req, res) => {
+  const configured = !!getAnthropic();
+  res.json({
+    configured,
+    provider: 'anthropic',
+    model: TRIAGE_MODEL,
+    via: 'replit-ai-integrations',
+  });
+});
+
+app.post('/api/triage', async (req, res) => {
+  const { kind, payload } = req.body || {};
+  if (!kind || !TRIAGE_KINDS.has(kind)) {
+    return res.status(400).json({
+      success: false,
+      error: `kind is required and must be one of: ${[...TRIAGE_KINDS].join(', ')}`,
+    });
+  }
+  if (payload === undefined || payload === null) {
+    return res.status(400).json({ success: false, error: 'payload is required' });
+  }
+  const client = getAnthropic();
+  if (!client) {
+    return res.status(503).json({
+      success: false,
+      error: 'AI triage is not configured on this server.',
+    });
+  }
+  const startedAt = Date.now();
+  try {
+    const prompt = buildTriagePrompt(kind, payload);
+    const message = await client.messages.create({
+      model: TRIAGE_MODEL,
+      max_tokens: 8192,
+      system: 'You output STRICT JSON only. No prose, no markdown fences.',
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const block = message.content && message.content[0];
+    const text = block && block.type === 'text' ? block.text : '';
+    let parsed;
+    try {
+      parsed = extractJson(text);
+    } catch (e) {
+      logger.error('triage JSON parse failed', e);
+      return res.status(502).json({
+        success: false,
+        error: 'Model returned malformed JSON.',
+        raw: text.slice(0, 4000),
+      });
+    }
+    const triage = normalizeTriage(parsed);
+    res.json({
+      success: true,
+      kind,
+      model: TRIAGE_MODEL,
+      durationMs: Date.now() - startedAt,
+      triage,
+    });
+  } catch (e) {
+    logger.error('triage call failed', e);
+    const status = e?.status && Number.isInteger(e.status) ? e.status : 500;
+    res.status(status).json({
+      success: false,
+      error: e?.message || 'Triage request failed',
+    });
   }
 });
 

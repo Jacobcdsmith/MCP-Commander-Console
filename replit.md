@@ -39,7 +39,16 @@ PORT=5000 node server.js
 | `GET /api/mcp/status` | MCP client status (CONNECTED/IDLE/NEVER), clientInfo, totals |
 | `GET /api/mcp/activity` | Cursor-paginated MCP/REST activity ring (`since`=event id, oldest-unseen-first, with `hasMore`) |
 | `GET /api/mcp/top-tools` | Windowed (`5m`/`1h`/`24h`) MCP `tools/call` leaderboard |
+| `GET /api/triage/status` | AI triage availability (configured / provider / model) |
+| `POST /api/triage` | AI triage of a Red Team / Security finding (`kind` + `payload` → structured JSON summary) |
 | `GET /favicon.ico` | Suppressed (204) |
+
+## AI-Assisted Findings Triage
+- "🤖 Triage with AI" button on every Red Team result panel (inject / subdomain / portscan / auth) and an "AI Triage Last Scan" button on the dashboard's Security Testing panel.
+- Backend `POST /api/triage` accepts `{ kind, payload }`, calls Claude (`claude-sonnet-4-6`) via the Replit AI Integrations Anthropic proxy (no user API key required, billed to Replit credits), and returns strict JSON: `{ overall_severity, summary, items: [{ severity, title, what, why, next_step }] }`.
+- Severities normalized server-side to one of `critical | high | medium | low | informational`; items capped at 8 and re-sorted most-severe first defensively.
+- UI helper `mountTriage()` in `pages/shared/lcars-core.js` renders the result inline below each scan with severity pills, sections, and a "Copy summary" markdown button. Loading + error states included.
+- `GET /api/triage/status` reports `{ configured, provider, model }`; UI disables the button with a hint when not configured.
 
 ## MCP Activity Panel
 - `pages/mcp-activity.html` — Live MCP visibility (status pill, request feed, top tools).

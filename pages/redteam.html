@@ -588,6 +588,7 @@
 
                 html += '</div>';
                 container.innerHTML = html;
+                mountTriage({ containerId: 'inject-results', kind: 'inject', getPayload: () => data });
                 vulnCount > 0 ? playErrorSound() : playSuccessSound();
             } catch (e) {
                 playErrorSound();
@@ -644,6 +645,7 @@
 
                 html += '</div>';
                 document.getElementById('subdomain-results').innerHTML = html;
+                mountTriage({ containerId: 'subdomain-results', kind: 'subdomain', getPayload: () => data });
                 data.found > 0 ? playErrorSound() : playSuccessSound();
             } catch (e) {
                 playErrorSound();
@@ -731,6 +733,7 @@
 
                 html += '</div>';
                 container.innerHTML = html;
+                mountTriage({ containerId: 'ports-results', kind: 'portscan', getPayload: () => data });
                 data.open > 0 ? playErrorSound() : playSuccessSound();
             } catch (e) {
                 playErrorSound();
@@ -793,6 +796,7 @@
                 }
 
                 container.innerHTML = html;
+                mountTriage({ containerId: 'auth-results', kind: 'auth', getPayload: () => data });
                 data.hits > 0 ? playErrorSound() : playSuccessSound();
             } catch (e) {
                 playErrorSound();
