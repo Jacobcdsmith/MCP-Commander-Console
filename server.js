@@ -1636,5 +1636,13 @@ _mcpTransport.onclose = () => {
 process.stdin.on('end',   _markDisconnected);
 process.stdin.on('close', _markDisconnected);
 server.connect(_mcpTransport);
+// Also hook the SDK-level onclose AFTER connect — the SDK installs its own
+// transport.onclose during connect(), so the server-level callback is the
+// most reliable place to learn about a closed protocol session.
+const _origServerOnClose = server.onclose;
+server.onclose = () => {
+  _markDisconnected();
+  if (typeof _origServerOnClose === 'function') _origServerOnClose();
+};
 logger.info('Enhanced MCP Server ready!');
 
