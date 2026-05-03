@@ -20,6 +20,8 @@
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
+![Starfleet Command — LCARS Bridge Interface](https://github.com/user-attachments/assets/f156b594-d3a3-451d-aa5e-33c2a72e97ce)
+
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.17%2B-5555ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNFY3bC04IDR6Ii8+PC9zdmc+)](https://github.com/modelcontextprotocol/sdk)
 [![Express](https://img.shields.io/badge/Express-5.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
@@ -208,6 +210,8 @@ docker-compose down
 ║ ▓▓▓▓▓▓▓▓▓▓ ║  [⚡ GIT STATUS] [📁 LIST FILES] [💻 SYS INFO]   ║
 ╚════════════╩═══════════════════════════════════════════════════╝
 ```
+
+![Starfleet Command — Dashboard Preview](https://github.com/user-attachments/assets/4893c18a-5557-4a6c-8d1f-7e52ee97ec11)
 
 The dashboard features:
 - **⚡ Interactive Terminal** — Real-time command execution with color-coded output
