@@ -50,6 +50,92 @@ const logger = {
   debug: (msg, data) => process.env.DEBUG && console.error(`[DEBUG] ${msg}`, data ? JSON.stringify(data, null, 2) : '')
 };
 
+// ─────────────────────────────────────────────────────────────────────
+// MCP Activity Tracker
+// In-memory ring buffer + counters that surface MCP-vs-REST tool
+// activity to the dashboard. Capped to ~500 events; per-tool counters
+// live in two windows (last hour, last 24h). Survives only the current
+// process lifetime (matches the existing in-memory analytics path).
+// ─────────────────────────────────────────────────────────────────────
+const MCP_RING_CAP = 500;
+const TOOL_HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000;  // counter retention
+const mcpActivity = {
+  events: [],                  // newest at end (display ring, capped)
+  nextId: 1,
+  clientInfo: null,            // { name, version } from MCP initialize
+  initializedAt: null,         // ms epoch when client first handshook
+  lastSeenAt: null,            // ms epoch of most recent MCP message
+  connected: false,            // flips false on transport close
+  totals: { mcp: 0, rest: 0, errors: 0 },
+  // Per-tool timestamp queues (oldest first) for accurate windowed counts
+  // independent of the display ring's 500-event cap.
+  toolHistory: new Map(),
+};
+function mcpPushToolHistory(tool, ts) {
+  if (!tool) return;
+  let q = mcpActivity.toolHistory.get(tool);
+  if (!q) { q = []; mcpActivity.toolHistory.set(tool, q); }
+  q.push(ts);
+  // Prune entries outside the longest supported window.
+  const cutoff = ts - TOOL_HISTORY_WINDOW_MS;
+  let drop = 0;
+  while (drop < q.length && q[drop] < cutoff) drop++;
+  if (drop) q.splice(0, drop);
+  if (q.length === 0) mcpActivity.toolHistory.delete(tool);
+}
+function mcpRecord(ev) {
+  const now = Date.now();
+  const event = {
+    id: mcpActivity.nextId++,
+    ts: now,
+    source: ev.source,                       // "mcp" | "rest"
+    method: ev.method || null,               // "tools/call", "tools/list", "initialize", "rest/execute"
+    tool: ev.tool || null,
+    durationMs: ev.durationMs ?? null,
+    success: ev.success !== false,
+    error: ev.error || null,
+  };
+  mcpActivity.events.push(event);
+  if (mcpActivity.events.length > MCP_RING_CAP) {
+    mcpActivity.events.splice(0, mcpActivity.events.length - MCP_RING_CAP);
+  }
+  if (event.source === 'mcp') {
+    mcpActivity.lastSeenAt = now;
+    mcpActivity.totals.mcp++;
+    if (event.method === 'tools/call') mcpPushToolHistory(event.tool, now);
+  } else if (event.source === 'rest') {
+    mcpActivity.totals.rest++;
+  }
+  if (!event.success) mcpActivity.totals.errors++;
+  return event;
+}
+function mcpComputeStatus() {
+  // CONNECTED: explicit transport flag is true OR we saw activity in the last 5 min.
+  // IDLE: we saw a client at some point but it's been quiet/disconnected.
+  // NEVER: the MCP transport has never seen a client handshake.
+  const FIVE_MIN = 5 * 60 * 1000;
+  const recent = mcpActivity.lastSeenAt && (Date.now() - mcpActivity.lastSeenAt) < FIVE_MIN;
+  if (mcpActivity.connected || recent) return 'CONNECTED';
+  if (mcpActivity.initializedAt) return 'IDLE';
+  return 'NEVER';
+}
+function mcpTopTools(windowMs) {
+  const cutoff = Date.now() - windowMs;
+  const out = [];
+  for (const [tool, q] of mcpActivity.toolHistory) {
+    // q is sorted ascending; binary-search-ish lower bound for cutoff
+    let lo = 0, hi = q.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (q[mid] < cutoff) lo = mid + 1; else hi = mid;
+    }
+    const count = q.length - lo;
+    if (count > 0) out.push({ tool, count });
+  }
+  out.sort((a, b) => b.count - a.count);
+  return out;
+}
+
 const safeExec = (command, options = {}) => {
   try {
     const result = execSync(command, {
@@ -933,6 +1019,7 @@ app.get('/api/metrics', (req, res) => {
 });
 
 app.post('/api/tools/execute', async (req, res) => {
+  const startedAt = Date.now();
   try {
     const { tool, args } = req.body;
 
@@ -941,11 +1028,69 @@ app.post('/api/tools/execute', async (req, res) => {
     }
 
     const result = await executeTool(tool, args);
+    mcpRecord({
+      source: 'rest',
+      method: 'rest/execute',
+      tool,
+      durationMs: Date.now() - startedAt,
+      success: result.success !== false,
+      error: result.success === false ? (result.error || null) : null,
+    });
     res.json(result);
   } catch (error) {
     logger.error('HTTP API error:', error);
+    mcpRecord({
+      source: 'rest',
+      method: 'rest/execute',
+      tool: req.body && req.body.tool,
+      durationMs: Date.now() - startedAt,
+      success: false,
+      error: error.message,
+    });
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// MCP Activity API — read-only surface for the MCP Activity panel.
+// ─────────────────────────────────────────────────────────────────────
+app.get('/api/mcp/status', (req, res) => {
+  res.json({
+    status: mcpComputeStatus(),
+    connected: mcpActivity.connected,
+    clientInfo: mcpActivity.clientInfo,
+    initializedAt: mcpActivity.initializedAt,
+    lastSeenAt: mcpActivity.lastSeenAt,
+    totals: mcpActivity.totals,
+    serverTime: Date.now(),
+  });
+});
+app.get('/api/mcp/activity', (req, res) => {
+  const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 100));
+  const since = parseInt(req.query.since, 10) || 0;
+  // Return the OLDEST unseen events first so the client never permanently
+  // drops events during a burst — it just polls again with the new cursor.
+  const unseen = mcpActivity.events.filter((e) => e.id > since);
+  const page = unseen.slice(0, limit);
+  const nextCursor = page.length ? page[page.length - 1].id : since;
+  res.json({
+    events: page.slice().reverse(),    // newest-first for UI insertion
+    cursor: nextCursor,
+    hasMore: unseen.length > page.length,
+    oldestRetainedId: mcpActivity.events.length ? mcpActivity.events[0].id : 0,
+    serverTime: Date.now(),
+  });
+});
+app.get('/api/mcp/top-tools', (req, res) => {
+  const windowParam = String(req.query.window || '1h');
+  const windowMs = windowParam === '24h' ? 24 * 60 * 60 * 1000
+                : windowParam === '5m' ? 5 * 60 * 1000
+                : 60 * 60 * 1000;
+  res.json({
+    window: windowParam,
+    tools: mcpTopTools(windowMs),
+    serverTime: Date.now(),
+  });
 });
 
 app.get('/api/tools', async (req, res) => {
@@ -1225,11 +1370,16 @@ app.listen(PORT, '0.0.0.0', () => {
 // MCP Tools Handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
+  const startedAt = Date.now();
 
   try {
     const result = await executeTool(name, args);
 
     if (result.success) {
+      mcpRecord({
+        source: 'mcp', method: 'tools/call', tool: name,
+        durationMs: Date.now() - startedAt, success: true,
+      });
       return {
         content: [{
           type: "text",
@@ -1237,6 +1387,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }]
       };
     } else {
+      mcpRecord({
+        source: 'mcp', method: 'tools/call', tool: name,
+        durationMs: Date.now() - startedAt, success: false,
+        error: result.error || 'Unknown error',
+      });
       return {
         content: [{
           type: "text",
@@ -1247,6 +1402,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
   } catch (error) {
     logger.error(`MCP tool execution error: ${name}`, error);
+    mcpRecord({
+      source: 'mcp', method: 'tools/call', tool: name,
+      durationMs: Date.now() - startedAt, success: false,
+      error: error.message,
+    });
     return {
       content: [{
         type: "text",
@@ -1259,6 +1419,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Tool definitions
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+  mcpRecord({ source: 'mcp', method: 'tools/list', success: true, durationMs: 0 });
   return {
     tools: [
       // Git Tools
@@ -1435,6 +1596,31 @@ process.on('uncaughtException', (error) => {
 });
 
 logger.info('Enhanced MCP Server starting...');
-server.connect(new StdioServerTransport());
+
+// Hook the MCP server lifecycle so the Activity panel can show
+// "CONNECTED / IDLE / NEVER", client identity, and a real handshake event.
+server.oninitialized = () => {
+  const ver = typeof server.getClientVersion === 'function' ? server.getClientVersion() : null;
+  mcpActivity.clientInfo = ver ? { name: ver.name, version: ver.version } : null;
+  mcpActivity.initializedAt = Date.now();
+  mcpActivity.lastSeenAt = Date.now();
+  mcpActivity.connected = true;
+  mcpRecord({
+    source: 'mcp',
+    method: 'initialize',
+    tool: null,
+    success: true,
+    durationMs: 0,
+  });
+  logger.info(`MCP client connected: ${ver ? ver.name + ' ' + ver.version : 'unknown'}`);
+};
+
+const _mcpTransport = new StdioServerTransport();
+const _origOnClose = _mcpTransport.onclose;
+_mcpTransport.onclose = () => {
+  mcpActivity.connected = false;
+  if (typeof _origOnClose === 'function') _origOnClose();
+};
+server.connect(_mcpTransport);
 logger.info('Enhanced MCP Server ready!');
 

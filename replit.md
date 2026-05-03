@@ -36,7 +36,16 @@ PORT=5000 node server.js
 | `GET /api/tools` | Tool manifest (40 tools) |
 | `POST /api/tools/execute` | Execute any MCP tool |
 | `GET /api/security/scan` | Automated security scan (audit + ports + sensitive files) |
+| `GET /api/mcp/status` | MCP client status (CONNECTED/IDLE/NEVER), clientInfo, totals |
+| `GET /api/mcp/activity` | Cursor-paginated MCP/REST activity ring (oldest-unseen-first, with `hasMore`) |
+| `GET /api/mcp/top-tools` | Windowed (`5m`/`1h`/`24h`) MCP `tools/call` leaderboard |
 | `GET /favicon.ico` | Suppressed (204) |
+
+## MCP Activity Panel
+- `pages/mcp-activity.html` — Live MCP visibility (status pill, request feed, top tools).
+- In-memory ring (cap 500 events) plus per-tool timestamp queues (24h retention) for accurate windowed counts independent of the display ring.
+- Captures `clientInfo` via `server.oninitialized` + `getClientVersion()`; flips `connected=false` on transport `onclose`.
+- Linked from hub on `pages/index.html` and the `dashboard.html` nav.
 
 ## MCP Tools (40 total)
 

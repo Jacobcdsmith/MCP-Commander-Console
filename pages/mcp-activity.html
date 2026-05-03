@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Activity - STARFLEET COMMAND</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/pages/shared/lcars-styles.css">
+    <style>
+        .mcp-status-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+        .mcp-stat {
+            background: rgba(0,40,80,0.45);
+            border: 2px solid var(--lcars-blue);
+            border-radius: 12px;
+            padding: 18px;
+        }
+        .mcp-stat-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            color: var(--lcars-light-blue);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.85;
+            margin-bottom: 8px;
+        }
+        .mcp-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--enterprise-gold);
+            text-shadow: 0 0 10px rgba(255,215,0,0.4);
+            word-break: break-word;
+        }
+        .mcp-stat-sub {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            color: var(--lcars-light-blue);
+            opacity: 0.75;
+            margin-top: 6px;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 18px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+        }
+        .status-pill.connected {
+            background: var(--console-green);
+            color: var(--lcars-black);
+            box-shadow: 0 0 18px rgba(0,255,65,0.55);
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        .status-pill.idle {
+            background: var(--lcars-yellow);
+            color: var(--lcars-black);
+            box-shadow: 0 0 14px rgba(255,255,153,0.45);
+        }
+        .status-pill.never {
+            background: rgba(255,102,102,0.85);
+            color: var(--lcars-white);
+            box-shadow: 0 0 12px rgba(255,102,102,0.4);
+        }
+        @keyframes pulseGlow {
+            0%,100% { box-shadow: 0 0 18px rgba(0,255,65,0.55); }
+            50%     { box-shadow: 0 0 28px rgba(0,255,65,0.85); }
+        }
+
+        .feed-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+        }
+        .feed-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--enterprise-gold);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--lcars-blue);
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,40,0.95);
+            z-index: 1;
+        }
+        .feed-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(85,85,255,0.18);
+            color: var(--lcars-light-blue);
+            vertical-align: middle;
+        }
+        .feed-table tr.new-row td {
+            animation: rowFadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes rowFadeIn {
+            from { background: rgba(0,255,65,0.18); }
+            to   { background: transparent; }
+        }
+        .feed-wrapper {
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid rgba(85,85,255,0.25);
+            border-radius: 8px;
+            background: rgba(0,0,30,0.55);
+        }
+        .src-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .src-pill.mcp  { background: rgba(0,255,65,0.18); color: var(--console-green); border: 1px solid var(--console-green); }
+        .src-pill.rest { background: rgba(85,85,255,0.18); color: var(--lcars-light-blue); border: 1px solid var(--lcars-blue); }
+        .ok-pill   { color: var(--console-green); font-weight: 700; }
+        .err-pill  { color: #ff6666; font-weight: 700; }
+        .tool-cell { font-family: 'Courier New', monospace; color: var(--enterprise-gold); }
+        .method-cell { font-family: 'Courier New', monospace; color: var(--lcars-light-blue); }
+        .ts-cell { font-family: 'Courier New', monospace; opacity: 0.85; white-space: nowrap; }
+
+        .top-tools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .top-tool-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(0,40,80,0.4);
+            border-left: 4px solid var(--lcars-blue);
+            border-radius: 6px;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+        .top-tool-row:hover {
+            border-left-color: var(--enterprise-gold);
+            transform: translateX(4px);
+        }
+        .top-tool-name { font-family: 'Courier New', monospace; color: var(--enterprise-gold); }
+        .top-tool-count {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            color: var(--console-green);
+            background: rgba(0,255,65,0.12);
+            border: 1px solid var(--console-green);
+            border-radius: 12px;
+            padding: 2px 12px;
+        }
+        .empty-msg {
+            padding: 22px;
+            text-align: center;
+            color: var(--lcars-light-blue);
+            opacity: 0.7;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .toggle-btn {
+            background: var(--lcars-purple);
+            color: var(--lcars-black);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        background 0.28s ease, box-shadow 0.28s ease;
+        }
+        .toggle-btn:hover { background: var(--enterprise-gold); transform: scale(1.04); }
+        .toggle-btn.active { background: var(--enterprise-gold); box-shadow: 0 0 14px rgba(255,215,0,0.55); }
+        .two-col {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 1100px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lcars-container">
+        <!-- Header -->
+        <div class="lcars-header">
+            <div class="header-left">
+                <a href="/pages/index.html" class="back-btn">← BACK</a>
+                <div>
+                    <h1 class="page-title">📡 MCP Activity</h1>
+                    <p class="page-subtitle">Live MCP Client Visibility &amp; Tool Invocations</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span class="status-text">ONLINE</span>
+                </div>
+                <span id="stardate" class="stardate"></span>
+            </div>
+        </div>
+
+        <!-- Status row -->
+        <div class="lcars-panel">
+            <div class="panel-header">
+                <span class="panel-icon">🛰️</span>
+                <h2 class="panel-title">MCP Client Status</h2>
+            </div>
+            <div class="panel-content">
+                <div class="mcp-status-row">
+                    <div class="mcp-stat">
+                        <div class="mcp-stat-label">Status</div>
+                        <div class="mcp-stat-value"><span id="mcp-status-pill" class="status-pill never">NEVER</span></div>
+                        <div class="mcp-stat-sub" id="mcp-last-seen">No client has connected</div>
+                    </div>
+                    <div class="mcp-stat">
+                        <div class="mcp-stat-label">Client Identity</div>
+                        <div class="mcp-stat-value" id="mcp-client-name">—</div>
+                        <div class="mcp-stat-sub" id="mcp-client-version">awaiting handshake</div>
+                    </div>
+                    <div class="mcp-stat">
+                        <div class="mcp-stat-label">MCP Calls</div>
+                        <div class="mcp-stat-value" id="mcp-total-mcp">0</div>
+                        <div class="mcp-stat-sub">since server start</div>
+                    </div>
+                    <div class="mcp-stat">
+                        <div class="mcp-stat-label">REST Calls</div>
+                        <div class="mcp-stat-value" id="mcp-total-rest">0</div>
+                        <div class="mcp-stat-sub" id="mcp-total-errors">0 errors total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- Live Feed -->
+            <div class="lcars-panel">
+                <div class="panel-header">
+                    <span class="panel-icon">📜</span>
+                    <h2 class="panel-title">Live Request Feed</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="controls-row">
+                        <button class="toggle-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                        <button class="toggle-btn" data-filter="mcp" onclick="setFilter('mcp')">MCP only</button>
+                        <button class="toggle-btn" data-filter="rest" onclick="setFilter('rest')">REST only</button>
+                        <button class="toggle-btn" data-filter="errors" onclick="setFilter('errors')">Errors</button>
+                        <button class="toggle-btn" id="pause-btn" onclick="togglePause()">⏸ Pause</button>
+                    </div>
+                    <div class="feed-wrapper">
+                        <table class="feed-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 130px;">Time</th>
+                                    <th style="width: 70px;">Src</th>
+                                    <th style="width: 130px;">Method</th>
+                                    <th>Tool</th>
+                                    <th style="width: 80px;">Status</th>
+                                    <th style="width: 80px; text-align:right;">ms</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feed-body">
+                                <tr><td colspan="6" class="empty-msg">Awaiting MCP traffic…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top tools -->
+            <div class="lcars-panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🏆</span>
+                    <h2 class="panel-title">Top MCP Tools</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="controls-row">
+                        <button class="toggle-btn active" data-window="1h" onclick="setWindow('1h')">Last hour</button>
+                        <button class="toggle-btn" data-window="24h" onclick="setWindow('24h')">Last 24h</button>
+                    </div>
+                    <div id="top-tools" class="top-tools-list">
+                        <div class="empty-msg">No MCP tool calls in this window.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lcars-footer" style="text-align:center; opacity:0.65; padding:14px;">
+            <p>STARFLEET COMMAND • MCP Activity Monitor • Polling every 2.5s</p>
+        </div>
+    </div>
+
+    <script src="/pages/shared/lcars-core.js"></script>
+    <script>
+        let lastCursor = 0;
+        let filter = 'all';
+        let topWindow = '1h';
+        let paused = false;
+        const MAX_ROWS = 200;
+        // In-flight guards prevent slow responses from overwriting newer UI state.
+        let inflight = { status: false, feed: false, top: false };
+
+        function setFilter(f) {
+            filter = f;
+            document.querySelectorAll('[data-filter]').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === f);
+            });
+            applyFilter();
+        }
+        function setWindow(w) {
+            topWindow = w;
+            document.querySelectorAll('[data-window]').forEach(b => {
+                b.classList.toggle('active', b.dataset.window === w);
+            });
+            refreshTopTools();
+        }
+        function togglePause() {
+            paused = !paused;
+            const btn = document.getElementById('pause-btn');
+            btn.textContent = paused ? '▶ Resume' : '⏸ Pause';
+            btn.classList.toggle('active', paused);
+        }
+
+        function applyFilter() {
+            document.querySelectorAll('#feed-body tr[data-source]').forEach(tr => {
+                const src = tr.dataset.source;
+                const ok  = tr.dataset.success === '1';
+                let show = true;
+                if (filter === 'mcp')    show = src === 'mcp';
+                else if (filter === 'rest')   show = src === 'rest';
+                else if (filter === 'errors') show = !ok;
+                tr.style.display = show ? '' : 'none';
+            });
+        }
+
+        function fmtTime(ms) {
+            const d = new Date(ms);
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3,'0')}`;
+        }
+        function relative(ms) {
+            if (!ms) return '—';
+            const diff = Date.now() - ms;
+            if (diff < 1000) return 'just now';
+            if (diff < 60000) return Math.floor(diff/1000) + 's ago';
+            if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+            return Math.floor(diff/3600000) + 'h ago';
+        }
+
+        async function refreshStatus() {
+            if (inflight.status) return;
+            inflight.status = true;
+            try {
+                const s = await fetch('/api/mcp/status').then(r => r.json());
+                const pill = document.getElementById('mcp-status-pill');
+                pill.className = 'status-pill ' + s.status.toLowerCase();
+                pill.textContent = s.status;
+                document.getElementById('mcp-last-seen').textContent =
+                    s.lastSeenAt ? `Last seen ${relative(s.lastSeenAt)}` :
+                    s.status === 'NEVER' ? 'No client has connected' : 'Idle';
+                document.getElementById('mcp-client-name').textContent =
+                    s.clientInfo?.name || '—';
+                document.getElementById('mcp-client-version').textContent =
+                    s.clientInfo?.version ? 'v' + s.clientInfo.version :
+                    s.clientInfo ? 'unknown version' : 'awaiting handshake';
+                document.getElementById('mcp-total-mcp').textContent = s.totals.mcp;
+                document.getElementById('mcp-total-rest').textContent = s.totals.rest;
+                document.getElementById('mcp-total-errors').textContent =
+                    `${s.totals.errors} error${s.totals.errors === 1 ? '' : 's'} total`;
+            } catch (e) { /* keep existing UI on error */ }
+            finally { inflight.status = false; }
+        }
+
+        function rowHtml(ev) {
+            const srcClass = ev.source === 'mcp' ? 'mcp' : 'rest';
+            const ok = ev.success !== false;
+            return `
+                <tr data-source="${ev.source}" data-success="${ok ? '1' : '0'}" class="new-row">
+                    <td class="ts-cell">${fmtTime(ev.ts)}</td>
+                    <td><span class="src-pill ${srcClass}">${ev.source.toUpperCase()}</span></td>
+                    <td class="method-cell">${escapeHtml(ev.method || '')}</td>
+                    <td class="tool-cell">${escapeHtml(ev.tool || '—')}</td>
+                    <td class="${ok ? 'ok-pill' : 'err-pill'}" title="${ev.error ? escapeHtml(ev.error) : ''}">
+                        ${ok ? '✓ OK' : '✗ ERR'}
+                    </td>
+                    <td style="text-align:right; font-family:'Courier New',monospace;">${ev.durationMs ?? '—'}</td>
+                </tr>
+            `;
+        }
+
+        async function refreshFeed() {
+            if (paused || inflight.feed) return;
+            inflight.feed = true;
+            try {
+                // Drain pages — server returns oldest unseen first with hasMore,
+                // so we never permanently lose events during a burst.
+                let drained = 0;
+                while (drained < 5) {  // safety bound on polls per tick
+                    const r = await fetch(
+                        `/api/mcp/activity?since=${lastCursor}&limit=200`
+                    ).then(r => r.json());
+                    if (!r.events || !r.events.length) {
+                        lastCursor = r.cursor || lastCursor;
+                        break;
+                    }
+                    const tbody = document.getElementById('feed-body');
+                    const placeholder = tbody.querySelector('.empty-msg');
+                    if (placeholder) tbody.innerHTML = '';
+
+                    // r.events is newest-first; server filters by id > since,
+                    // so dedupe-by-Set is unnecessary (avoids unbounded growth).
+                    tbody.insertAdjacentHTML('afterbegin',
+                        r.events.map(rowHtml).join(''));
+                    while (tbody.children.length > MAX_ROWS) {
+                        tbody.removeChild(tbody.lastChild);
+                    }
+                    applyFilter();
+                    setTimeout(() => {
+                        tbody.querySelectorAll('tr.new-row').forEach(tr =>
+                            tr.classList.remove('new-row'));
+                    }, 700);
+                    lastCursor = r.cursor;
+                    if (!r.hasMore) break;
+                    drained++;
+                }
+            } catch (e) { /* swallow transient */ }
+            finally { inflight.feed = false; }
+        }
+
+        async function refreshTopTools() {
+            if (inflight.top) return;
+            inflight.top = true;
+            try {
+                const r = await fetch(`/api/mcp/top-tools?window=${topWindow}`).then(r => r.json());
+                const wrap = document.getElementById('top-tools');
+                if (!r.tools || !r.tools.length) {
+                    wrap.innerHTML = '<div class="empty-msg">No MCP tool calls in this window.</div>';
+                    return;
+                }
+                wrap.innerHTML = r.tools.slice(0, 12).map(t => `
+                    <div class="top-tool-row">
+                        <span class="top-tool-name">${escapeHtml(t.tool)}</span>
+                        <span class="top-tool-count">${t.count}</span>
+                    </div>
+                `).join('');
+            } catch (e) { /* keep prior UI */ }
+            finally { inflight.top = false; }
+        }
+
+        function tick() {
+            refreshStatus();
+            refreshFeed();
+            refreshTopTools();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            tick();
+            setInterval(tick, 2500);
+        });
+    </script>
+</body>
+</html>
