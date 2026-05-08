@@ -825,12 +825,16 @@ const getPromoTemplate = async () => {
   _promoTemplate = await fs.readFile(path.join(__dirname, 'promo', 'index.html'), 'utf8');
   return _promoTemplate;
 };
+const getSiteUrl = (req) => {
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').split(',')[0].trim();
+  const host = (req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim();
+  return `${proto}://${host}`;
+};
+
 const renderPromo = async (req, res) => {
   try {
     const tpl = await getPromoTemplate();
-    const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').split(',')[0].trim();
-    const host  = (req.headers['x-forwarded-host']  || req.headers.host  || `localhost:${PORT}`).split(',')[0].trim();
-    const siteUrl = `${proto}://${host}`;
+    const siteUrl = getSiteUrl(req);
     res.type('html').send(tpl.split('__SITE_URL__').join(siteUrl));
   } catch (err) {
     logger.error('renderPromo failed', err);
@@ -850,6 +854,45 @@ app.get('/', (req, res) => {
 // (without trailing slash on the dir) is still served by express.static
 // as a raw file — that's fine; meta tags simply won't be templated there.
 app.get(['/promo', '/promo/'], renderPromo);
+
+app.get('/robots.txt', (req, res) => {
+  const siteUrl = getSiteUrl(req);
+  res.type('text/plain').send([
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /api/security/',
+    `Sitemap: ${siteUrl}/sitemap.xml`
+  ].join('\n'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  const siteUrl = getSiteUrl(req);
+  const lastmod = new Date().toISOString().split('T')[0];
+  const urls = [
+    '/',
+    '/promo/',
+    '/dashboard',
+    '/bridge',
+    '/pages/index.html',
+    '/pages/git.html',
+    '/pages/files.html',
+    '/pages/system.html',
+    '/pages/docker.html',
+    '/pages/data.html',
+    '/pages/network.html',
+    '/pages/analytics.html',
+    '/pages/services.html'
+  ];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map((u) => `  <url><loc>${siteUrl}${u}</loc><lastmod>${lastmod}</lastmod></url>`)
+  .join('\n')}
+</urlset>`;
+
+  res.type('application/xml').send(xml);
+});
 
 app.get(['/dashboard', '/bridge'], (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));

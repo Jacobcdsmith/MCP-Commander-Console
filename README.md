@@ -255,6 +255,24 @@ Copy `.env.example` → `.env` and adjust before launch.
 
 ---
 
+## ◈ COMMUNITY & GOVERNANCE
+
+- Code of Conduct: [`.github/CODE_OF_CONDUCT.md`](./.github/CODE_OF_CONDUCT.md)
+- Contributing guide: [`.github/CONTRIBUTING.md`](./.github/CONTRIBUTING.md)
+- Security policy: [`.github/SECURITY.md`](./.github/SECURITY.md)
+- Support guide: [`.github/SUPPORT.md`](./.github/SUPPORT.md)
+- PR template: [`.github/pull_request_template.md`](./.github/pull_request_template.md)
+- Issue templates: [`.github/ISSUE_TEMPLATE`](./.github/ISSUE_TEMPLATE)
+
+## ◈ DISCOVERABILITY (SEO · AEO · GEO)
+
+- Rich Open Graph + Twitter metadata on landing pages
+- Structured data (`schema.org`) for answer and generative engines
+- `llms.txt` guidance for AI agents and retrieval systems
+- Dynamic `robots.txt` and `sitemap.xml` endpoints for crawler indexing
+
+---
+
 ## ◈ TECH MANIFEST — BUILT WITH
 
 | Component | Technology |

@@ -1,0 +1,20 @@
+# MCPStarfleetCommand
+
+MCPStarfleetCommand is an enhanced Model Context Protocol server with an LCARS dashboard, REST API, and analytics tooling.
+
+Primary docs:
+- README: /README.md
+- Quickstart: /QUICKSTART.md
+- Architecture: /ARCHITECTURE.md
+- Cheatsheet: /CHEATSHEET.md
+- Docker guide: /DOCKER-README.md
+
+Entry points:
+- Landing page: /
+- Dashboard: /dashboard
+- Modules hub: /pages/index.html
+
+API references:
+- Status: /api/status
+- Tools list: /api/tools
+- Tool execution: /api/tools/execute
