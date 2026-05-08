@@ -3409,15 +3409,15 @@
                             <div class="tool-name">🔒 SSL Certificate</div>
                             <div class="tool-description">Check cert expiry, issuer, fingerprint</div>
                         </div>
-                        <div class="lcars-button sec-btn" onclick="executeCommand('scan_sensitive_files', {directory: '.'})">
+                        <div class="lcars-button sec-btn" onclick="runSensitiveFileScan()">
                             <div class="tool-name">🔑 Sensitive File Scan</div>
                             <div class="tool-description">Find .env, *.key, *.pem, credentials</div>
                         </div>
-                        <div class="lcars-button sec-btn" onclick="executeCommand('git_secrets_scan', {})">
+                        <div class="lcars-button sec-btn" onclick="runGitSecretsScan()">
                             <div class="tool-name">🔐 Git Secrets Scan</div>
                             <div class="tool-description">Hunt secrets in git commit history</div>
                         </div>
-                        <div class="lcars-button sec-btn" onclick="executeCommand('cve_check', {})">
+                        <div class="lcars-button sec-btn" onclick="runCveCheck()">
                             <div class="tool-name">🐛 CVE Check</div>
                             <div class="tool-description">npm vulnerabilities with CVE details</div>
                         </div>
@@ -3438,6 +3438,11 @@
                             <div class="tool-description">Check for over-permissive files</div>
                         </div>
                         <div id="security-triage-mount" style="grid-column:1/-1;"></div>
+                        <div id="triage-mount-headers" style="grid-column:1/-1;"></div>
+                        <div id="triage-mount-ssl" style="grid-column:1/-1;"></div>
+                        <div id="triage-mount-cve" style="grid-column:1/-1;"></div>
+                        <div id="triage-mount-sensitive" style="grid-column:1/-1;"></div>
+                        <div id="triage-mount-gitsecrets" style="grid-column:1/-1;"></div>
                         <div class="lcars-button sec-btn" onclick="executeCommand('run_command', {command: 'find / -maxdepth 5 -perm /4000 -type f 2>/dev/null | head -20 || echo \"None found\"'})">
                             <div class="tool-name">⚙️ SUID/SGID Files</div>
                             <div class="tool-description">Privileged binary detection</div>
@@ -6848,9 +6853,9 @@
             catch { _triageStatusCacheDash = { configured:false }; }
             return _triageStatusCacheDash;
         }
-        function _triageMd(t){
+        function _triageMd(t, label){
             const lines = [
-                `# AI Triage — Security Audit`,
+                `# AI Triage — ${label || 'Finding'}`,
                 ``,
                 `**Overall severity:** ${t.overall_severity}`,
                 ``,
@@ -6876,107 +6881,214 @@
                   <div class="triage-section"><span class="triage-section-label">Next step</span>${_trEsc(it.next_step)}</div>
                 </div>`).join('') || '<div class="triage-section">No items returned.</div>';
         }
-        async function _ensureTriageMount(){
-            const mount = document.getElementById('security-triage-mount');
+
+        // Per-kind cache of the most recent raw scan payload for triage.
+        // Each entry holds the structured payload we'll hand to /api/triage.
+        const _lastScanPayloads = {};
+
+        // Generic factory: builds a "🤖 Triage with AI" launcher inside the
+        // given mount, wired to a specific triage `kind`. The launcher hint
+        // doubles as a "scan first" prompt; the same panel is rebuilt on
+        // every click so users can re-triage updated results.
+        async function _ensureTriageLauncher(opts) {
+            const mount = document.getElementById(opts.mountId);
             if (!mount) return null;
             if (mount.dataset.ready === '1') return mount;
             mount.dataset.ready = '1';
             const status = await _getTriageStatusDash();
+
             const launcher = document.createElement('div');
             launcher.className = 'triage-launcher';
             const btn = document.createElement('button');
-            btn.id = 'security-triage-btn';
             btn.className = 'triage-btn';
             btn.type = 'button';
-            btn.innerHTML = '🤖 AI Triage Last Scan';
+            btn.innerHTML = `🤖 ${opts.buttonLabel}`;
             const hint = document.createElement('span');
             hint.className = 'triage-hint';
-            if (status.configured){
-                hint.textContent = `via ${status.provider||'anthropic'} · ${status.model||''} — run Quick Scan first, then click to triage.`;
+            if (status.configured) {
+                hint.textContent = `via ${status.provider||'anthropic'} · ${status.model||''} — ${opts.scanFirstHint}`;
             } else {
                 btn.disabled = true;
                 btn.title = 'AI triage unavailable — Anthropic integration not configured';
                 hint.innerHTML = `AI triage unavailable — <a href="https://docs.replit.com/replit-workspace/integrations" target="_blank" rel="noopener">configure the Anthropic integration</a> (or set <code>ANTHROPIC_API_KEY</code>) to enable.`;
             }
-            launcher.appendChild(btn); launcher.appendChild(hint);
+            launcher.appendChild(btn);
+            launcher.appendChild(hint);
             mount.appendChild(launcher);
+
             const slot = document.createElement('div');
-            slot.id = 'security-triage-slot';
+            slot.className = 'triage-result-slot';
             mount.appendChild(slot);
-            btn.addEventListener('click', triageLastQuickScan);
+
+            btn.addEventListener('click', async () => {
+                const liveStatus = await _getTriageStatusDash();
+                if (!liveStatus.configured) {
+                    slot.innerHTML = `<div class="triage-result"><div class="triage-error">AI triage is not configured on this server.</div></div>`;
+                    return;
+                }
+                const payload = (typeof opts.getPayload === 'function') ? opts.getPayload() : null;
+                if (payload == null) {
+                    slot.innerHTML = `<div class="triage-result"><div class="triage-error">${_trEsc(opts.emptyHint || "Run the scan first — there's nothing to triage yet.")}</div></div>`;
+                    return;
+                }
+                btn.disabled = true;
+                slot.innerHTML = `<div class="triage-result"><div class="triage-loading"><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span>Triaging finding with AI…</span></div></div>`;
+                try {
+                    const resp = await fetch('/api/triage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ kind: opts.kind, payload }),
+                    });
+                    const data = await resp.json().catch(() => ({}));
+                    if (!resp.ok || !data.success) {
+                        if (resp.status === 502 && data && data.raw) {
+                            slot.innerHTML = `<div class="triage-result"><div class="triage-error">⚠ The model returned malformed JSON. Showing raw output below — please retry.</div><pre class="triage-section" style="white-space:pre-wrap;max-height:320px;overflow:auto;margin-top:10px;">${_trEsc(data.raw)}</pre></div>`;
+                            return;
+                        }
+                        throw new Error((data && data.error) || `HTTP ${resp.status}: ${resp.statusText}`);
+                    }
+                    const t = data.triage;
+                    slot.innerHTML = `
+                        <div class="triage-result">
+                            <div class="triage-header">
+                                <span class="severity-pill severity-${_trEsc(t.overall_severity)}">${_trEsc(t.overall_severity)}</span>
+                                <span class="triage-header-title">AI Triage — ${_trEsc(opts.resultLabel || opts.buttonLabel)}</span>
+                                <span class="triage-header-meta">${_trEsc(data.model||'')} · ${data.durationMs||0} ms</span>
+                            </div>
+                            ${t.summary ? `<div class="triage-summary">${_trEsc(t.summary)}</div>` : ''}
+                            <div class="triage-items">${_renderTriageItems(t)}</div>
+                            <div class="triage-actions">
+                                <button class="triage-copy-btn" type="button">Copy summary</button>
+                            </div>
+                        </div>`;
+                    const md = _triageMd(t, opts.resultLabel || opts.buttonLabel);
+                    const copyBtn = slot.querySelector('.triage-copy-btn');
+                    copyBtn.addEventListener('click', async () => {
+                        try { await navigator.clipboard.writeText(md); copyBtn.textContent='Copied ✓'; setTimeout(()=>{copyBtn.textContent='Copy summary';},1500); }
+                        catch { copyBtn.textContent='Copy failed'; }
+                    });
+                } catch (e) {
+                    slot.innerHTML = `<div class="triage-result"><div class="triage-error">${_trEsc(e.message||'Triage failed')}</div></div>`;
+                } finally {
+                    btn.disabled = !liveStatus.configured;
+                }
+            });
             return mount;
+        }
+
+        // Backwards-compatible audit triage (Quick Scan). Kept as its own
+        // thin wrapper so any external code that still references the old
+        // names (`_ensureTriageMount`, `triageLastQuickScan`) keeps working.
+        async function _ensureTriageMount(){
+            return _ensureTriageLauncher({
+                mountId: 'security-triage-mount',
+                kind: 'audit',
+                buttonLabel: 'AI Triage Last Scan',
+                resultLabel: 'Security Audit',
+                scanFirstHint: 'run Quick Scan first, then click to triage.',
+                emptyHint: `Run "Quick Scan (API)" first — there's nothing to triage yet.`,
+                getPayload: () => _lastQuickScan,
+            });
         }
         async function triageLastQuickScan(){
             await _ensureTriageMount();
-            const slot = document.getElementById('security-triage-slot');
-            const btn = document.getElementById('security-triage-btn');
-            const status = await _getTriageStatusDash();
-            if (!status.configured){
-                if (slot) slot.innerHTML = `<div class="triage-result"><div class="triage-error">AI triage is not configured on this server.</div></div>`;
-                return;
-            }
-            if (!_lastQuickScan){
-                if (slot) slot.innerHTML = `<div class="triage-result"><div class="triage-error">Run "Quick Scan (API)" first — there's nothing to triage yet.</div></div>`;
-                return;
-            }
-            if (btn) btn.disabled = true;
-            slot.innerHTML = `<div class="triage-result"><div class="triage-loading"><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span class="triage-loading-dot"></span><span>Triaging finding with AI…</span></div></div>`;
-            try {
-                const resp = await fetch('/api/triage', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body: JSON.stringify({kind:'audit', payload:_lastQuickScan})
-                });
-                const data = await resp.json().catch(()=>({}));
-                if (!resp.ok || !data.success){
-                    if (resp.status === 502 && data && data.raw){
-                        slot.innerHTML = `<div class="triage-result"><div class="triage-error">⚠ The model returned malformed JSON. Showing raw output below — please retry.</div><pre class="triage-section" style="white-space:pre-wrap;max-height:320px;overflow:auto;margin-top:10px;">${_trEsc(data.raw)}</pre></div>`;
-                        return;
-                    }
-                    throw new Error((data && data.error) || `HTTP ${resp.status}: ${resp.statusText}`);
-                }
-                const t = data.triage;
-                slot.innerHTML = `
-                    <div class="triage-result">
-                        <div class="triage-header">
-                            <span class="severity-pill severity-${_trEsc(t.overall_severity)}">${_trEsc(t.overall_severity)}</span>
-                            <span class="triage-header-title">AI Triage — Security Audit</span>
-                            <span class="triage-header-meta">${_trEsc(data.model||'')} · ${data.durationMs||0} ms</span>
-                        </div>
-                        ${t.summary ? `<div class="triage-summary">${_trEsc(t.summary)}</div>` : ''}
-                        <div class="triage-items">${_renderTriageItems(t)}</div>
-                        <div class="triage-actions">
-                            <button class="triage-copy-btn" type="button" id="security-triage-copy">Copy summary</button>
-                        </div>
-                    </div>`;
-                const md = _triageMd(t);
-                const copyBtn = document.getElementById('security-triage-copy');
-                copyBtn.addEventListener('click', async () => {
-                    try { await navigator.clipboard.writeText(md); copyBtn.textContent='Copied ✓'; setTimeout(()=>{copyBtn.textContent='Copy summary';},1500); }
-                    catch { copyBtn.textContent='Copy failed'; }
-                });
-            } catch (e) {
-                slot.innerHTML = `<div class="triage-result"><div class="triage-error">${_trEsc(e.message||'Triage failed')}</div></div>`;
-            } finally {
-                if (btn) btn.disabled = !status.configured;
-            }
+            const mount = document.getElementById('security-triage-mount');
+            const btn = mount && mount.querySelector('.triage-btn');
+            if (btn) btn.click();
         }
-        document.addEventListener('DOMContentLoaded', () => { _ensureTriageMount(); });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            _ensureTriageMount();
+            _ensureTriageLauncher({
+                mountId: 'triage-mount-headers',
+                kind: 'headers',
+                buttonLabel: 'Triage HTTP Headers',
+                resultLabel: 'HTTP Headers',
+                scanFirstHint: 'run "HTTP Headers Check" or "Check This Server" first.',
+                emptyHint: `Run "HTTP Headers Check" or "Check This Server" first — nothing to triage yet.`,
+                getPayload: () => _lastScanPayloads.headers || null,
+            });
+            _ensureTriageLauncher({
+                mountId: 'triage-mount-ssl',
+                kind: 'ssl',
+                buttonLabel: 'Triage SSL Certificate',
+                resultLabel: 'SSL Certificate',
+                scanFirstHint: 'run "SSL Certificate" first.',
+                emptyHint: `Run "SSL Certificate" first — nothing to triage yet.`,
+                getPayload: () => _lastScanPayloads.ssl || null,
+            });
+            _ensureTriageLauncher({
+                mountId: 'triage-mount-cve',
+                kind: 'cve',
+                buttonLabel: 'Triage CVE Check',
+                resultLabel: 'CVE / npm audit',
+                scanFirstHint: 'run "CVE Check" first.',
+                emptyHint: `Run "CVE Check" first — nothing to triage yet.`,
+                getPayload: () => _lastScanPayloads.cve || null,
+            });
+            _ensureTriageLauncher({
+                mountId: 'triage-mount-sensitive',
+                kind: 'sensitive',
+                buttonLabel: 'Triage Sensitive File Scan',
+                resultLabel: 'Sensitive Files',
+                scanFirstHint: 'run "Sensitive File Scan" first.',
+                emptyHint: `Run "Sensitive File Scan" first — nothing to triage yet.`,
+                getPayload: () => _lastScanPayloads.sensitive || null,
+            });
+            _ensureTriageLauncher({
+                mountId: 'triage-mount-gitsecrets',
+                kind: 'gitsecrets',
+                buttonLabel: 'Triage Git Secrets Scan',
+                resultLabel: 'Git Secrets',
+                scanFirstHint: 'run "Git Secrets Scan" first.',
+                emptyHint: `Run "Git Secrets Scan" first — nothing to triage yet.`,
+                getPayload: () => _lastScanPayloads.gitsecrets || null,
+            });
+        });
+
+        // Each wrapper executes the underlying tool then captures the raw
+        // result into _lastScanPayloads[<kind>] so the per-kind triage
+        // launcher can hand a structured payload to /api/triage.
+        async function _runAndCapture(kind, toolName, args, extra) {
+            const result = await executeCommand(toolName, args);
+            if (result && result.success) {
+                _lastScanPayloads[kind] = Object.assign({
+                    tool: toolName,
+                    args,
+                    output: result.output,
+                    capturedAt: new Date().toISOString(),
+                }, extra || {});
+            }
+            return result;
+        }
 
         async function promptHttpHeadersCheck() {
             const url = prompt('URL to check security headers:', 'https://example.com');
             if (!url) return;
-            executeCommand('http_headers_check', { url });
+            await _runAndCapture('headers', 'http_headers_check', { url }, { url });
         }
 
         async function checkOwnHeaders() {
-            executeCommand('http_headers_check', { url: `http://localhost:${window.location.port || 5000}` });
+            const url = `http://localhost:${window.location.port || 5000}`;
+            await _runAndCapture('headers', 'http_headers_check', { url }, { url });
         }
 
         async function promptSslCheck() {
             const hostname = prompt('Hostname to check SSL certificate (e.g. google.com):');
             if (!hostname) return;
-            executeCommand('ssl_check', { hostname });
+            await _runAndCapture('ssl', 'ssl_check', { hostname }, { hostname });
+        }
+
+        async function runSensitiveFileScan() {
+            await _runAndCapture('sensitive', 'scan_sensitive_files', { directory: '.' });
+        }
+
+        async function runGitSecretsScan() {
+            await _runAndCapture('gitsecrets', 'git_secrets_scan', {});
+        }
+
+        async function runCveCheck() {
+            await _runAndCapture('cve', 'cve_check', {});
         }
 
         // =====================================================

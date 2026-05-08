@@ -1175,7 +1175,10 @@ app.get('/api/security/scan', async (req, res) => {
 // plain-English summary: per-item severity, what it means, why it matters,
 // recommended next step. Uses the Replit AI Integrations Anthropic proxy
 // (env vars auto-populated; no user API key required).
-const TRIAGE_KINDS = new Set(['inject', 'subdomain', 'portscan', 'auth', 'audit']);
+const TRIAGE_KINDS = new Set([
+  'inject', 'subdomain', 'portscan', 'auth', 'audit',
+  'headers', 'ssl', 'cve', 'sensitive', 'gitsecrets',
+]);
 const TRIAGE_MODEL = 'claude-sonnet-4-6';
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'informational'];
 
@@ -1205,6 +1208,11 @@ const TRIAGE_KIND_DESCRIPTIONS = {
   portscan: 'TCP port scan against a single host. Open ports — especially database, admin, or remote-access ports — should be flagged.',
   auth: 'Credential-stuffing simulation against a login endpoint. A "hit" is any non-401/403/429 response — heuristic, not confirmed compromise. Any hit at all is worth highlighting.',
   audit: 'Local security audit of this server: open ports, sensitive files (.env / *.key / *.pem), and config issues. Output is text from shell scans.',
+  headers: 'HTTP security-header analysis of a single URL. The output lists which protective response headers (Strict-Transport-Security, Content-Security-Policy, X-Content-Type-Options, X-Frame-Options, Referrer-Policy) are present or missing, plus informational fingerprinting headers (Server, X-Powered-By, Cache-Control), and a "Security Score" of N/5 protective headers present. Missing protective headers are real hardening gaps; a leaked Server / X-Powered-By is a low-severity info leak. Treat this as a configuration finding for the URL — not an exploitable vulnerability on its own.',
+  ssl: 'TLS/SSL certificate inspection for a hostname (subject, issuer, notBefore/notAfter, SHA-256 fingerprint, days-until-expiry). Flag: expired or near-expiry certs (<30 days), self-signed or unknown-issuer certs, hostname mismatch, weak algorithms, or "no SSL" plaintext-only services. Cert hygiene is operational — call out the concrete remediation (renew, switch CA, enforce HTTPS).',
+  cve: 'Output of `npm audit` for the server\'s own dependency tree. Includes per-severity counts (critical / high / moderate / low) and a list of affected packages with the underlying CVE titles or CWE references. Critical / high entries with available fixes are the priority. If the report is empty / clean, say so honestly — do not invent risk.',
+  sensitive: 'Filesystem scan for secret-bearing files (.env*, *.pem, *.key, id_rsa, *.token, .netrc, .htpasswd, shadow/passwd) plus a high-entropy token-pattern grep across JSON / env / config files. Any committed secret material is high severity; mere presence of a local .env (uncommitted) is lower severity. Distinguish between "file exists on disk" and "file is exposed/committed".',
+  gitsecrets: 'Scan of git history (last 20 commits + full log -p grep) for embedded credential patterns (password=, secret=, token=, api_key=, private_key=). Any real-looking credential in history is high/critical — git history is effectively public once pushed and rewriting history is the only fix. Note clearly when matches look like placeholders, examples, or test fixtures vs. live credentials.',
 };
 
 function buildTriagePrompt(kind, payload) {
