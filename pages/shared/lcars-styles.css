@@ -1,9 +1,9 @@
 /* ============================================
-   Command Grid SHARED STYLES - cinematic sci-fi Interface
+   Command Center SHARED STYLES - cinematic sci-fi Interface
    ============================================ */
 
 :root {
-    /* Command Grid Color Palette */
+    /* Command Center Color Palette */
     --lcars-blue: #5555ff;
     --lcars-orange: #ff9900;
     --lcars-red: #cc6666;
@@ -73,7 +73,7 @@ body::before {
     100% { transform: translateY(-100px); }
 }
 
-/* Command Grid Container */
+/* Command Center Container */
 .lcars-container {
     width: 100%;
     min-height: 100vh;
@@ -83,7 +83,7 @@ body::before {
     margin: 0 auto;
 }
 
-/* Command Grid Header */
+/* Command Center Header */
 .lcars-header {
     background: linear-gradient(45deg, var(--lcars-dark-blue) 0%, var(--lcars-blue) 100%);
     border: 2px solid var(--lcars-orange);
@@ -207,7 +207,7 @@ body::before {
     color: var(--enterprise-silver);
 }
 
-/* Command Grid Panel */
+/* Command Center Panel */
 .lcars-panel {
     background: linear-gradient(135deg, var(--lcars-gray) 0%, rgba(0,0,50,0.9) 100%);
     border: 3px solid var(--lcars-orange);
@@ -428,7 +428,7 @@ body::before {
     line-height: 1.4;
 }
 
-/* Command Grid Button */
+/* Command Center Button */
 .lcars-btn {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;

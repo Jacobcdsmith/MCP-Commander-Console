@@ -1,7 +1,7 @@
 <div align="center">
 
 
-![Aegis Command Grid — Operations Interface](https://github.com/user-attachments/assets/f156b594-d3a3-451d-aa5e-33c2a72e97ce)
+![MCP Command Center — Operations Interface](https://github.com/user-attachments/assets/f156b594-d3a3-451d-aa5e-33c2a72e97ce)
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.17%2B-5555ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNFY3bC04IDR6Ii8+PC9zdmc+)](https://github.com/modelcontextprotocol/sdk)
@@ -21,7 +21,7 @@
 > *"The computer is the most democratic tool ever invented. Its purpose is to do whatever its user requests."*  
 > — *Platform Directive*
 
-**Aegis Command Grid** is an enhanced [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server with a fully interactive **operations web dashboard**. It bridges Claude Code AI integration (via MCP stdio) with a polished browser-based command console, giving you developer tools, file-system ops, system monitoring, and Docker-scale observability from a single unified interface.
+**MCP Command Center** is an enhanced [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server with a fully interactive **operations web dashboard**. It bridges Claude Code AI integration (via MCP stdio) with a polished browser-based command console, giving you developer tools, file-system ops, system monitoring, and Docker-scale observability from a single unified interface.
 
 ---
 
@@ -113,7 +113,7 @@ npm install
 npm start                # Production warp
 npm run dev              # Debug mode (verbose logs)
 
-# 3. Open Command Grid console
+# 3. Open MCP Command Center
 open http://localhost:3001
 ```
 
@@ -165,7 +165,7 @@ docker-compose down
 
 | Service | Port | Purpose |
 |---|---|---|
-| **MCP Server** | `:3001` | Core server · Command Grid dashboard · REST API |
+| **MCP Server** | `:3001` | Core server · command center dashboard · REST API |
 | **Grafana** | `:3000` | Visual analytics · alerts · dashboards |
 | **Analytics** | `:3002` | Real-time event tracking |
 | **Prometheus** | `:9090` | Time-series metrics database |
@@ -179,7 +179,7 @@ docker-compose down
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║ ████ AEGIS MCP ████████████████████████████████ 47.2 GHz ████║
+║ ████ MCP COMMAND CENTER ███████████████████████ 47.2 GHz ████║
 ╠════════════╦═══════════════════════════════════════════════════╣
 ║ NAV        ║  ┌──────────────────────────────────────────┐    ║
 ║ ▶ TERMINAL ║  │ > system_info                            │    ║
@@ -192,12 +192,12 @@ docker-compose down
 ╚════════════╩═══════════════════════════════════════════════════╝
 ```
 
-![Aegis Command Grid — Dashboard Preview](https://github.com/user-attachments/assets/4893c18a-5557-4a6c-8d1f-7e52ee97ec11)
+![MCP Command Center — Dashboard Preview](https://github.com/user-attachments/assets/4893c18a-5557-4a6c-8d1f-7e52ee97ec11)
 
 The dashboard features:
 - **⚡ Interactive Terminal** — Real-time command execution with color-coded output
 - **📡 System Monitoring** — Live CPU, memory, disk, and uptime gauges
-- **🗂️ Tool Panel** — Every MCP tool available as a one-click Command Grid button
+- **🗂️ Tool Panel** — Every MCP tool available as a one-click command center control
 - **🔐 File Operations** — Read, write, browse files directly in browser
 - **📊 Git Integration** — Status, log, diff, branches at a glance
 
@@ -262,7 +262,7 @@ Copy `.env.example` → `.env` and adjust before launch.
 | Runtime | Node.js 18+ |
 | MCP Protocol | `@modelcontextprotocol/sdk` ^1.17 |
 | HTTP Server | Express.js 5.x |
-| Dashboard UI | Vanilla HTML · CSS (Command Grid) · JS |
+| Dashboard UI | Vanilla HTML · CSS (Command Center theme) · JS |
 | Analytics | Custom metrics engine |
 | Monitoring | Prometheus + Grafana |
 | Cache | Redis |
@@ -291,7 +291,7 @@ npm run audit:fix    # Fix known vulnerabilities
 
 ```
 ╔═══════════════════════════════════════════════════════════╗
-║  ◈  AEGIS MCP · ALL SYSTEMS NOMINAL · WARP READY  ◈  ║
+║  ◈  MCP COMMAND CENTER · ALL SYSTEMS NOMINAL · READY  ◈  ║
 ╚═══════════════════════════════════════════════════════════╝
 ```
 

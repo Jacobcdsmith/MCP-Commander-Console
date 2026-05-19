@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis Command Grid - Enhanced MCP Operations Interface</title>
+    <title>MCP Command Center - Enhanced MCP Operations Interface</title>
+    <meta name="description" content="MCP Command Center dashboard for tool execution, live system status, analytics, security testing, and guided workflows.">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Command Grid Color Palette */
+            /* Command Center Color Palette */
             --lcars-blue: #5555ff;
             --lcars-orange: #ff9900;
             --lcars-red: #cc6666;
@@ -85,7 +86,7 @@
             padding: 20px;
         }
 
-        /* Command Grid Header */
+        /* Command Center Header */
         .lcars-header {
             background: linear-gradient(45deg, var(--lcars-dark-blue) 0%, var(--lcars-blue) 100%);
             border: 2px solid var(--lcars-orange);
@@ -207,7 +208,7 @@
             opacity: 0.8;
         }
 
-        /* Command Grid Panel Grid */
+        /* Command Center Panel Grid */
         .lcars-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -686,7 +687,7 @@
             50% { opacity: 0.5; }
         }
 
-        /* Command Grid Control Panel */
+        /* Command Center Control Panel */
         .lcars-control-panel {
             background: linear-gradient(135deg, var(--lcars-gray) 0%, rgba(0,0,50,0.95) 100%);
             border: 3px solid var(--lcars-purple);
@@ -1983,7 +1984,7 @@
         }
 
         /* =====================================================
-           AEGIS BOOT INTRO
+           MCP COMMAND CENTER BOOT INTRO
            ===================================================== */
         #command-intro {
             position: fixed;
@@ -2044,7 +2045,7 @@
             100% { opacity: 0.5; transform: scaleX(1); }
         }
 
-        /* Command Grid top/bottom bars sweep in */
+        /* Command Center top/bottom bars sweep in */
         .intro-bar {
             position: absolute;
             left: 0;
@@ -2071,7 +2072,7 @@
             100% { transform: scaleX(1); }
         }
 
-        /* Side Command Grid pillars */
+        /* Side Command Center pillars */
         .intro-pillar {
             position: absolute;
             top: 60px;
@@ -2095,7 +2096,7 @@
             to   { opacity: 0.95; transform: translateY(0); }
         }
 
-        /* Aegis delta emblem */
+        /* MCP Command Center delta emblem */
         .intro-emblem {
             width: 96px;
             height: 96px;
@@ -2253,7 +2254,7 @@
         }
 
         /* =====================================================
-           Command Grid GUIDED TOUR (Tutorial)
+           Command Center GUIDED TOUR (Tutorial)
            ===================================================== */
         .nav-link.tour {
             background: linear-gradient(45deg, #5b3a8e, #8a4dd0);
@@ -2673,9 +2674,9 @@
 </head>
 <body>
     <!-- =====================================================
-         AEGIS BOOT INTRO (cinematic)
+         MCP COMMAND CENTER BOOT INTRO (cinematic)
          ===================================================== -->
-    <div id="command-intro" role="dialog" aria-label="Aegis Boot Sequence">
+    <div id="command-intro" role="dialog" aria-label="MCP Command Center Boot Sequence">
         <div class="intro-starfield"></div>
         <div class="intro-warp"></div>
         <div class="intro-bar top"></div>
@@ -2693,7 +2694,7 @@
             </defs>
             <!-- Outer ring -->
             <circle cx="60" cy="60" r="54" fill="none" stroke="#ffd700" stroke-width="2.5" opacity="0.55"/>
-            <!-- Aegis delta arrowhead -->
+            <!-- Command center insignia arrowhead -->
             <path d="M60 18 L100 96 Q60 76 20 96 Z"
                   fill="url(#deltaGrad)"
                   stroke="#fff7c2" stroke-width="1.5"
@@ -2705,8 +2706,8 @@
             <circle cx="60" cy="70" r="3" fill="#fff"/>
         </svg>
 
-        <h1 class="intro-title">AEGIS</h1>
-        <div class="intro-subtitle">AEGIS COMMAND GRID · OPERATIONS INTERFACE</div>
+        <h1 class="intro-title">MCP</h1>
+        <div class="intro-subtitle">MCP COMMAND CENTER · OPERATIONS INTERFACE</div>
 
         <div class="intro-bootlog" id="introBootLog"></div>
 
@@ -2720,7 +2721,7 @@
     <!-- =====================================================
          GUIDED TOUR (Tutorial Overlay)
          ===================================================== -->
-    <div id="lcars-tutorial" role="dialog" aria-modal="true" aria-label="Aegis Command Grid Tour">
+    <div id="lcars-tutorial" role="dialog" aria-modal="true" aria-label="MCP Command Center Tour">
         <div class="tutorial-backdrop" id="tutorialBackdrop"></div>
         <div class="tutorial-ring" id="tutorialRing"></div>
         <div class="tutorial-card" id="tutorialCard">
@@ -2740,14 +2741,14 @@
         </div>
     </div>
 
-    <!-- Audio elements for Command Grid sounds -->
+    <!-- Audio elements for Command Center sounds -->
     <audio class="audio-feedback" id="buttonBeep" preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsTteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PC" type="audio/wav">
     </audio>
 
     <div class="lcars-container">
         <div class="lcars-header">
-            <h1 class="enterprise-title">AEGIS COMMAND GRID</h1>
+            <h1 class="enterprise-title">MCP COMMAND CENTER</h1>
             <p class="enterprise-subtitle">Enhanced MCP Platform - Operations Interface</p>
             <div class="commanddeck-status">
                 <div class="warp-core-indicator"></div>
@@ -2759,7 +2760,7 @@
         <!-- Navigation Bar -->
         <nav class="nav-bar">
             <span class="nav-label">⬡ Modules</span>
-            <a href="/pages/index.html" class="nav-link hub">🗺 Module Hub</a>
+            <a href="/pages/index.html" class="nav-link hub">🗺 Module Index</a>
             <div class="nav-divider"></div>
             <a href="/pages/git.html"      class="nav-link">🔀 Git</a>
             <a href="/pages/files.html"    class="nav-link">📁 Files</a>
@@ -3904,7 +3905,7 @@
 
         <div class="commanddeck-footer">
             <div class="command-emblem">★</div>
-            <p class="footer-text">AEGIS COMMAND GRID - Enhanced MCP Server Interface</p>
+            <p class="footer-text">MCP COMMAND CENTER - Enhanced MCP Server Interface</p>
         </div>
     </div>
 
@@ -3945,7 +3946,7 @@
 
     <script>
         // =====================================================
-        // AEGIS COMMAND GRID INTERFACE - Core Systems
+        // MCP COMMAND CENTER INTERFACE - Core Systems
         // =====================================================
         
         const API_BASE = window.location.origin;
@@ -3955,7 +3956,7 @@
         let autoRefreshInterval = null;
 
         // =====================================================
-        // AEGIS BOOT INTRO — cinematic boot sequence
+        // MCP COMMAND CENTER BOOT INTRO — cinematic boot sequence
         // =====================================================
         (function commanddeckIntro() {
             const BOOT_LINES = [
@@ -4188,13 +4189,13 @@
             {
                 selector: '.lcars-header',
                 title: 'Welcome aboard, Commander',
-                body: 'This is Aegis Command Grid — your MCP command deck. Live system status, mission-time clock, and core activity indicators are all visible here.',
+                body: 'This is MCP Command Center — your MCP command center. Live system status, mission-time clock, and core activity indicators are all visible here.',
                 placement: 'bottom'
             },
             {
                 selector: '.nav-bar',
                 title: 'Module Navigation',
-                body: 'Jump between mission modules — Git, Files, System, Network, Data, Docker, Analytics, Services, and the Red Team testing range. The Module Hub is your command directory.',
+                body: 'Jump between mission modules — Git, Files, System, Network, Data, Docker, Analytics, Services, and the Red Team testing range. The Module Index is your command directory.',
                 placement: 'bottom'
             },
             {
@@ -4224,7 +4225,7 @@
             {
                 selector: 'body',
                 title: 'You have the conn',
-                body: 'That\'s the command deck. 40 MCP tools across 8 categories, live analytics, security testing, digital forensics, and a Red Team range — all ready.',
+                body: 'That\'s the command center. 40 MCP tools across 8 categories, live analytics, security testing, digital forensics, and a Red Team range — all ready.',
                 placement: 'center',
                 isFinal: true
             }
@@ -4425,7 +4426,7 @@
         }
 
         // =====================================================
-        // Command Grid Audio System
+        // Command Center Audio System
         // =====================================================
         function initAudio() {
             if (!audioContext) {
@@ -6715,7 +6716,7 @@
 
         // ---- Activity Terminal ----
         const VIZ_MESSAGES = [
-            {type:'success', text:'Aegis Command Grid Interface online — 40 tools registered'},
+            {type:'success', text:'MCP Command Center Interface online — 40 tools registered'},
             {type:'info',    text:'MCP protocol handshake complete on stdio'},
             {type:'warn',    text:'GF_SECURITY_ADMIN_PASSWORD detected in git history'},
             {type:'success', text:'SSL certificate valid — 62 days remaining (*.google.com)'},
@@ -6886,7 +6887,7 @@
                 await loadSystemStats();
                 
                 setTimeout(() => {
-                    addTerminalLine('INITIALIZATION', 'AEGIS COMMAND GRID INTERFACE ONLINE');
+                    addTerminalLine('INITIALIZATION', 'MCP COMMAND CENTER INTERFACE ONLINE');
                     addTerminalLine('ANALYTICS', 'Real-time monitoring active - updating every second');
                     addTerminalLine('SHORTCUTS', 'Ctrl+R=Refresh | Ctrl+K=Clear | Ctrl+H=Health | Ctrl+T=Tools | Ctrl+`=Console | Esc=Hide');
                 }, 300);

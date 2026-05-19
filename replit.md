@@ -1,7 +1,7 @@
 # Enhanced MCP Server
 
 ## Overview
-An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (Command Grid/cinematic sci-fi themed UI). Provides both an MCP protocol interface for AI model integration and an HTTP dashboard for manual interaction and monitoring.
+An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (Command Center/cinematic sci-fi themed UI). Provides both an MCP protocol interface for AI model integration and an HTTP dashboard for manual interaction and monitoring.
 
 ## Architecture
 - **Runtime**: Node.js v18.20.8, npm 10.8.2
@@ -114,10 +114,10 @@ PORT=5000 node server.js
 14. **Ship's Status** — Real-time system stats (platform, CPUs, memory, uptime, hostname)
 15. **Real-Time Analytics** *(full-width)* — Live CPU/memory charts (blended real + animated), gauges, heatmap, sparklines, activity feed from `/api/metrics` every 5s
 
-## Aegis Boot Intro
+## MCP Command Center Boot Intro
 - Cinematic full-screen overlay (`#command-intro`) on first DOM load
-- Command Grid bars sweep in, side pillars rise, starfield + warp streaks fade in
-- Animated Aegis delta emblem (SVG with gold gradient + glow)
+- Command Center bars sweep in, side pillars rise, starfield + warp streaks fade in
+- Animated MCP Command Center delta emblem (SVG with gold gradient + glow)
 - Boot log lines type out sequentially (subspace, warp, deflector, etc.)
 - Final flash + "ACCESS GRANTED · WELCOME, COMMANDER" pill
 - Dismissible via SPACE / ESC / click; auto-dismisses after ~5.3s
@@ -183,7 +183,7 @@ PORT=5000 node server.js
 - **`/` is the landing page** — Visitors land on the animated promo/showcase
   page; the dashboard is one click away at `/dashboard` (alias `/bridge`).
   `?app=1` on `/` skips the landing and goes straight to the dashboard.
-- `promo/index.html` — Standalone animated Command Grid landing/showcase page,
+- `promo/index.html` — Standalone animated Command Center landing/showcase page,
   also reachable at `/promo/` directly
 - `promo/promo-trailer.mp4` — 45-second auto-built product trailer (15
   scenes, 1920×1080 @ 30 fps, ~5MB). Embedded at the top of the promo page
@@ -193,7 +193,7 @@ PORT=5000 node server.js
   trailer from the screenshots with crossfade transitions. Run anytime
   the screenshots are refreshed.
 - `promo/og-card.jpg` — 1200×630 Open Graph social card for link previews.
-  Built from `promo/og.html` (a self-contained 1200×630 Command Grid card) via a
+  Built from `promo/og.html` (a self-contained 1200×630 Command Center card) via a
   screenshot + ffmpeg crop. Referenced from `og:image`, `og:image:width`,
   `og:image:height`, `twitter:card=summary_large_image`, and `twitter:image`
   meta tags in `promo/index.html`.

@@ -1,5 +1,5 @@
 // ============================================
-// Command Grid SHARED JAVASCRIPT - Core Functions
+// Command Center SHARED JAVASCRIPT - Core Functions
 // ============================================
 
 const API_BASE = window.location.origin;
