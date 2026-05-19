@@ -141,7 +141,7 @@ curl http://localhost:3001/api/status
 ## 📈 What Each Dashboard Shows
 
 ### MCP Server (localhost:3001)
-- Interactive LCARS-style interface
+- Interactive Command Center-style interface
 - Execute tools directly from UI
 - Real-time system stats
 - Terminal output display

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARFLEET COMMAND - MCP Control Hub</title>
+    <title>MCP Command Center - Module Directory</title>
+    <meta name="description" content="MCP Command Center module directory with one-click access to Git, file system, system operations, network tools, data processing, analytics, Docker, and security testing.">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/pages/shared/lcars-styles.css">
     <style>
@@ -252,8 +253,8 @@
     <div class="lcars-container">
         <!-- Hero Section -->
         <div class="hero-section">
-            <h1 class="hero-title">STARFLEET COMMAND</h1>
-            <p class="hero-subtitle">Model Context Protocol • Control Hub</p>
+            <h1 class="hero-title">MCP COMMAND CENTER</h1>
+            <p class="hero-subtitle">Model Context Protocol • Command Center • Module Directory</p>
             <div class="hero-stats">
                 <div class="hero-stat">
                     <div class="hero-stat-value" id="tool-count">13</div>
@@ -264,15 +265,15 @@
                     <div class="hero-stat-label">Modules</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-value" id="stardate">--.--</div>
-                    <div class="hero-stat-label">Stardate</div>
+                    <div class="hero-stat-value" id="mission-time">--.--</div>
+                    <div class="hero-stat-label">Mission Time</div>
                 </div>
             </div>
         </div>
 
         <!-- Quick Links -->
         <div class="quick-links">
-            <a href="/dashboard.html" class="quick-link">📊 Full Dashboard</a>
+            <a href="/dashboard.html" class="quick-link">📊 Open Main Dashboard</a>
             <a href="http://localhost:3000" target="_blank" class="quick-link grafana">📈 Grafana</a>
             <a href="http://localhost:9090" target="_blank" class="quick-link prometheus">🔥 Prometheus</a>
             <a href="http://localhost:3002" target="_blank" class="quick-link analytics">📉 Analytics</a>
@@ -297,7 +298,7 @@
                 <span>Grafana</span>
             </div>
             <div class="status-item">
-                <span id="stardate-display" class="stardate"></span>
+                <span id="mission-time-display" class="mission-time"></span>
             </div>
         </div>
 
@@ -439,17 +440,22 @@
 
         <!-- Footer -->
         <div class="lcars-footer">
-            <p class="footer-text">STARFLEET COMMAND • Enhanced MCP Server • LCARS Interface v2.0</p>
+            <p class="footer-text">MCP COMMAND CENTER • Enhanced MCP Server • Operations Interface v2.0</p>
         </div>
     </div>
 
     <script src="/pages/shared/lcars-core.js"></script>
     <script>
-        // Update stardate in hero
-        function updateHeroStardate() {
-            const el = document.getElementById('stardate');
+        // Update mission time in hero
+        function updateHeroMissionTime() {
+            const missionTime = generateMissionTime();
+            const el = document.getElementById('mission-time');
             if (el) {
-                el.textContent = generateStardate();
+                el.textContent = missionTime;
+            }
+            const displayEl = document.getElementById('mission-time-display');
+            if (displayEl) {
+                displayEl.textContent = `MISSION TIME ${missionTime}`;
             }
         }
 
@@ -482,8 +488,8 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            updateHeroStardate();
-            setInterval(updateHeroStardate, 1000);
+            updateHeroMissionTime();
+            setInterval(updateHeroMissionTime, 1000);
             checkAllServices();
             setInterval(checkAllServices, 30000);
         });

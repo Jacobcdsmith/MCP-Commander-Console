@@ -220,7 +220,7 @@ Code quality and consistency:
 
 3. **Access Dashboard:**
    - Open browser to `http://localhost:3001`
-   - Use LCARS-themed interface for testing
+   - Use command-grid-themed interface for testing
 
 ### Debugging Workflow
 

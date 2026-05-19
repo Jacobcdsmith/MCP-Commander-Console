@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARFLEET - Enhanced MCP Server Command Interface</title>
+    <title>MCP Command Center - Enhanced MCP Operations Interface</title>
+    <meta name="description" content="MCP Command Center dashboard for tool execution, live system status, analytics, security testing, and guided workflows.">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* LCARS Color Palette */
+            /* Command Center Color Palette */
             --lcars-blue: #5555ff;
             --lcars-orange: #ff9900;
             --lcars-red: #cc6666;
@@ -20,7 +21,7 @@
             --lcars-gray: #333366;
             --lcars-white: #ffffff;
             
-            /* Enterprise Accent Colors */
+            /* Accent Colors */
             --enterprise-gold: #ffd700;
             --enterprise-silver: #c0c0c0;
             --warp-core-blue: #00d4ff;
@@ -77,7 +78,7 @@
             100% { transform: translateY(-100px); }
         }
 
-        /* LCARS Interface Framework */
+        /* Operations Interface Framework */
         .lcars-container {
             width: 100%;
             min-height: 100vh;
@@ -85,7 +86,7 @@
             padding: 20px;
         }
 
-        /* LCARS Header */
+        /* Command Center Header */
         .lcars-header {
             background: linear-gradient(45deg, var(--lcars-dark-blue) 0%, var(--lcars-blue) 100%);
             border: 2px solid var(--lcars-orange);
@@ -154,7 +155,7 @@
             margin-bottom: 20px;
         }
 
-        .starfleet-status {
+        .commanddeck-status {
             display: flex;
             align-items: center;
             gap: 20px;
@@ -199,7 +200,7 @@
             letter-spacing: 1px;
         }
 
-        .stardate {
+        .mission-time {
             margin-left: auto;
             font-family: 'Orbitron', monospace;
             font-size: 0.9rem;
@@ -207,7 +208,7 @@
             opacity: 0.8;
         }
 
-        /* LCARS Panel Grid */
+        /* Command Center Panel Grid */
         .lcars-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -686,7 +687,7 @@
             50% { opacity: 0.5; }
         }
 
-        /* LCARS Control Panel */
+        /* Command Center Control Panel */
         .lcars-control-panel {
             background: linear-gradient(135deg, var(--lcars-gray) 0%, rgba(0,0,50,0.95) 100%);
             border: 3px solid var(--lcars-purple);
@@ -1548,7 +1549,7 @@
             color: var(--lcars-black);
         }
 
-        .starfleet-footer {
+        .commanddeck-footer {
             text-align: center;
             padding: 40px 20px;
             margin-top: 50px;
@@ -1565,7 +1566,7 @@
             letter-spacing: 2px;
         }
 
-        .federation-emblem {
+        .command-emblem {
             width: 40px;
             height: 40px;
             margin: 0 auto 15px;
@@ -1983,9 +1984,9 @@
         }
 
         /* =====================================================
-           STARFLEET BOOT INTRO
+           MCP COMMAND CENTER BOOT INTRO
            ===================================================== */
-        #starfleet-intro {
+        #command-intro {
             position: fixed;
             inset: 0;
             z-index: 99999;
@@ -1999,7 +2000,7 @@
             color: var(--lcars-orange);
             transition: opacity 0.7s ease, visibility 0.7s ease;
         }
-        #starfleet-intro.intro-fade {
+        #command-intro.intro-fade {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -2044,7 +2045,7 @@
             100% { opacity: 0.5; transform: scaleX(1); }
         }
 
-        /* LCARS top/bottom bars sweep in */
+        /* Command Center top/bottom bars sweep in */
         .intro-bar {
             position: absolute;
             left: 0;
@@ -2071,7 +2072,7 @@
             100% { transform: scaleX(1); }
         }
 
-        /* Side LCARS pillars */
+        /* Side Command Center pillars */
         .intro-pillar {
             position: absolute;
             top: 60px;
@@ -2095,7 +2096,7 @@
             to   { opacity: 0.95; transform: translateY(0); }
         }
 
-        /* Starfleet delta emblem */
+        /* MCP Command Center delta emblem */
         .intro-emblem {
             width: 96px;
             height: 96px;
@@ -2240,8 +2241,8 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            #starfleet-intro,
-            #starfleet-intro *,
+            #command-intro,
+            #command-intro *,
             .lcars-panel.lcars-enter,
             #lcars-tutorial,
             #lcars-tutorial * {
@@ -2253,7 +2254,7 @@
         }
 
         /* =====================================================
-           LCARS GUIDED TOUR (Tutorial)
+           Command Center GUIDED TOUR (Tutorial)
            ===================================================== */
         .nav-link.tour {
             background: linear-gradient(45deg, #5b3a8e, #8a4dd0);
@@ -2477,11 +2478,11 @@
                 margin-bottom: 14px;
             }
 
-            .starfleet-status {
+            .commanddeck-status {
                 flex-wrap: wrap;
                 gap: 12px;
             }
-            .stardate { margin-left: 0; }
+            .mission-time { margin-left: 0; }
 
             /* Single-column panel grid so cards never overflow at 375px */
             .lcars-grid {
@@ -2592,7 +2593,7 @@
                 min-width: 0;
             }
 
-            .starfleet-footer {
+            .commanddeck-footer {
                 padding: 24px 12px;
                 margin-top: 24px;
             }
@@ -2673,9 +2674,9 @@
 </head>
 <body>
     <!-- =====================================================
-         STARFLEET BOOT INTRO (cinematic)
+         MCP COMMAND CENTER BOOT INTRO (cinematic)
          ===================================================== -->
-    <div id="starfleet-intro" role="dialog" aria-label="Starfleet Boot Sequence">
+    <div id="command-intro" role="dialog" aria-label="MCP Command Center Boot Sequence">
         <div class="intro-starfield"></div>
         <div class="intro-warp"></div>
         <div class="intro-bar top"></div>
@@ -2693,7 +2694,7 @@
             </defs>
             <!-- Outer ring -->
             <circle cx="60" cy="60" r="54" fill="none" stroke="#ffd700" stroke-width="2.5" opacity="0.55"/>
-            <!-- Starfleet delta arrowhead -->
+            <!-- Command center insignia arrowhead -->
             <path d="M60 18 L100 96 Q60 76 20 96 Z"
                   fill="url(#deltaGrad)"
                   stroke="#fff7c2" stroke-width="1.5"
@@ -2705,8 +2706,8 @@
             <circle cx="60" cy="70" r="3" fill="#fff"/>
         </svg>
 
-        <h1 class="intro-title">STARFLEET</h1>
-        <div class="intro-subtitle">UNITED FEDERATION OF PLANETS · COMMAND INTERFACE</div>
+        <h1 class="intro-title">MCP</h1>
+        <div class="intro-subtitle">MCP COMMAND CENTER · OPERATIONS INTERFACE</div>
 
         <div class="intro-bootlog" id="introBootLog"></div>
 
@@ -2720,7 +2721,7 @@
     <!-- =====================================================
          GUIDED TOUR (Tutorial Overlay)
          ===================================================== -->
-    <div id="lcars-tutorial" role="dialog" aria-modal="true" aria-label="Starfleet Command Tour">
+    <div id="lcars-tutorial" role="dialog" aria-modal="true" aria-label="MCP Command Center Tour">
         <div class="tutorial-backdrop" id="tutorialBackdrop"></div>
         <div class="tutorial-ring" id="tutorialRing"></div>
         <div class="tutorial-card" id="tutorialCard">
@@ -2740,26 +2741,26 @@
         </div>
     </div>
 
-    <!-- Audio elements for LCARS sounds -->
+    <!-- Audio elements for Command Center sounds -->
     <audio class="audio-feedback" id="buttonBeep" preload="auto">
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsTteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PCKQQsSteLvw2QcBzqM0fPQfycFJHfH8N2QQAoUXrTp66hVFApGn+DyvmsbBTaQ2PC" type="audio/wav">
     </audio>
 
     <div class="lcars-container">
         <div class="lcars-header">
-            <h1 class="enterprise-title">STARFLEET COMMAND</h1>
-            <p class="enterprise-subtitle">Enhanced MCP Server - Command Interface</p>
-            <div class="starfleet-status">
+            <h1 class="enterprise-title">MCP COMMAND CENTER</h1>
+            <p class="enterprise-subtitle">Enhanced MCP Platform - Operations Interface</p>
+            <div class="commanddeck-status">
                 <div class="warp-core-indicator"></div>
                 <span class="status-text">Systems Operational</span>
-                <span id="stardate" class="stardate"></span>
+                <span id="mission-time" class="mission-time"></span>
             </div>
         </div>
 
         <!-- Navigation Bar -->
         <nav class="nav-bar">
             <span class="nav-label">⬡ Modules</span>
-            <a href="/pages/index.html" class="nav-link hub">🗺 Module Hub</a>
+            <a href="/pages/index.html" class="nav-link hub">🗺 Module Index</a>
             <div class="nav-divider"></div>
             <a href="/pages/git.html"      class="nav-link">🔀 Git</a>
             <a href="/pages/files.html"    class="nav-link">📁 Files</a>
@@ -3902,9 +3903,9 @@
 
         </div><!-- end main-pane -->
 
-        <div class="starfleet-footer">
-            <div class="federation-emblem">★</div>
-            <p class="footer-text">STARFLEET COMMAND - Enhanced MCP Server Interface</p>
+        <div class="commanddeck-footer">
+            <div class="command-emblem">★</div>
+            <p class="footer-text">MCP COMMAND CENTER - Enhanced MCP Server Interface</p>
         </div>
     </div>
 
@@ -3945,7 +3946,7 @@
 
     <script>
         // =====================================================
-        // STARFLEET COMMAND INTERFACE - Core Systems
+        // MCP COMMAND CENTER INTERFACE - Core Systems
         // =====================================================
         
         const API_BASE = window.location.origin;
@@ -3955,11 +3956,11 @@
         let autoRefreshInterval = null;
 
         // =====================================================
-        // STARFLEET BOOT INTRO — cinematic boot sequence
+        // MCP COMMAND CENTER BOOT INTRO — cinematic boot sequence
         // =====================================================
-        (function starfleetIntro() {
+        (function commanddeckIntro() {
             const BOOT_LINES = [
-                { t: 'STARDATE LINK',          s: 'SYNC',      cls: 'pulse' },
+                { t: 'MISSION TIME LINK',      s: 'SYNC',      cls: 'pulse' },
                 { t: 'WARP CORE PLASMA',       s: 'NOMINAL',   cls: 'ok'    },
                 { t: 'SUBSPACE TRANSCEIVER',   s: 'ONLINE',    cls: 'ok'    },
                 { t: 'TACTICAL SENSORS',       s: 'ARMED',     cls: 'ok'    },
@@ -3969,7 +3970,7 @@
             ];
 
             function runIntro() {
-                const overlay = document.getElementById('starfleet-intro');
+                const overlay = document.getElementById('command-intro');
                 if (!overlay) return;
                 const log     = document.getElementById('introBootLog');
                 const grant   = document.getElementById('introGrant');
@@ -4048,7 +4049,7 @@
                     overlay.removeEventListener('click', dismiss);
                     // Notify the rest of the app that the intro is gone so
                     // entrance animations + first-run tutorial can fire.
-                    document.dispatchEvent(new CustomEvent('starfleet:ready'));
+                    document.dispatchEvent(new CustomEvent('commanddeck:ready'));
                 }
 
                 function onKey(e) {
@@ -4079,7 +4080,7 @@
         // =====================================================
         let _entranceAnimationsApplied = false;
         function applyEntranceAnimations() {
-            // Guard: both starfleet:ready and the DOMContentLoaded safety-net
+            // Guard: both commanddeck:ready and the DOMContentLoaded safety-net
             // can call this — make sure the cascade runs at most once.
             if (_entranceAnimationsApplied) return;
             _entranceAnimationsApplied = true;
@@ -4150,7 +4151,7 @@
 
         // Trigger the smoothness pass once the intro is gone (or immediately
         // if the intro isn't present, e.g. for prefers-reduced-motion users).
-        document.addEventListener('starfleet:ready', () => {
+        document.addEventListener('commanddeck:ready', () => {
             applyEntranceAnimations();
             const params = _promoFlags();
             const forceTour = params.has('tour');
@@ -4168,7 +4169,7 @@
             attachRippleFeedback();
             // Safety net: if intro element is somehow already gone (e.g. a
             // hot-reload), still apply entrance animations.
-            if (!document.getElementById('starfleet-intro')) {
+            if (!document.getElementById('command-intro')) {
                 applyEntranceAnimations();
                 const params = _promoFlags();
                 const forceTour = params.has('tour');
@@ -4188,19 +4189,19 @@
             {
                 selector: '.lcars-header',
                 title: 'Welcome aboard, Commander',
-                body: 'This is Starfleet Command — the bridge of your MCP server. Live system status, stardate clock, and the warp core indicator all live up here.',
+                body: 'This is MCP Command Center — your MCP command center. Live system status, mission-time clock, and core activity indicators are all visible here.',
                 placement: 'bottom'
             },
             {
                 selector: '.nav-bar',
                 title: 'Module Navigation',
-                body: 'Jump between mission modules — Git, Files, System, Network, Data, Docker, Analytics, Services, and the Red Team testing range. The Module Hub is your command directory.',
+                body: 'Jump between mission modules — Git, Files, System, Network, Data, Docker, Analytics, Services, and the Red Team testing range. The Module Index is your command directory.',
                 placement: 'bottom'
             },
             {
                 selector: '.lcars-grid > .lcars-panel',
                 title: 'Tool Panels',
-                body: 'Each panel groups related tools. Click any glowing LCARS button to fire that tool — output streams into the floating console.',
+                body: 'Each panel groups related tools. Click any control to run that tool — output streams into the floating console.',
                 placement: 'right'
             },
             {
@@ -4210,9 +4211,9 @@
                 placement: 'left'
             },
             {
-                selector: '#stardate',
-                title: 'Stardate Clock',
-                body: 'Real-time stardate, updated every second. Because nothing says "command interface" like a stardate that ticks up while you work.',
+                selector: '#mission-time',
+                title: 'Mission Time Clock',
+                body: 'Real-time mission time updates every second so execution logs stay anchored to live operations.',
                 placement: 'bottom'
             },
             {
@@ -4224,7 +4225,7 @@
             {
                 selector: 'body',
                 title: 'You have the conn',
-                body: 'That\'s the bridge. 40 MCP tools across 8 categories, live analytics, security testing, digital forensics, and a Red Team range — all yours. Engage.',
+                body: 'That\'s the command center. 40 MCP tools across 8 categories, live analytics, security testing, digital forensics, and a Red Team range — all ready.',
                 placement: 'center',
                 isFinal: true
             }
@@ -4425,7 +4426,7 @@
         }
 
         // =====================================================
-        // LCARS Audio System
+        // Command Center Audio System
         // =====================================================
         function initAudio() {
             if (!audioContext) {
@@ -4469,19 +4470,19 @@
         }
 
         // =====================================================
-        // Stardate System
+        // Mission Time System
         // =====================================================
-        function generateStardate(date = new Date()) {
+        function generateMissionTime(date = new Date()) {
             const year = date.getFullYear();
             const dayOfYear = Math.floor((date - new Date(year, 0, 0)) / 1000 / 60 / 60 / 24);
             const timeOfDay = (date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()) / 86400;
             return `${year}.${String(dayOfYear).padStart(3, '0')}.${String(Math.floor(timeOfDay * 10)).padStart(1, '0')}`;
         }
 
-        function updateStardate() {
-            const element = document.getElementById('stardate');
+        function updateMissionTime() {
+            const element = document.getElementById('mission-time');
             if (element) {
-                element.textContent = `STARDATE: ${generateStardate()}`;
+                element.textContent = `MISSION TIME: ${generateMissionTime()}`;
             }
         }
 
@@ -4526,7 +4527,7 @@
 
             const commandLine = document.createElement('div');
             commandLine.className = 'terminal-line';
-            commandLine.innerHTML = `<span class="terminal-prompt">STARDATE ${escapeHtml(entry.stardate || '')} </span><span class="terminal-command">${escapeHtml(entry.command || '')}</span>`;
+            commandLine.innerHTML = `<span class="terminal-prompt">MISSION TIME ${escapeHtml(entry.missionTime || '')} </span><span class="terminal-command">${escapeHtml(entry.command || '')}</span>`;
 
             const outputLine = document.createElement('div');
             outputLine.className = `terminal-line terminal-output ${entry.isError ? 'error' : ''}`;
@@ -4557,7 +4558,7 @@
             const terminal = document.getElementById('terminal-content');
             if (!terminal) return;
 
-            const stardate = generateStardate();
+            const missionTime = generateMissionTime();
 
             // Format output - handle JSON and multi-line
             let formattedOutput = output;
@@ -4569,7 +4570,7 @@
                 command: String(command == null ? '' : command),
                 output: formattedOutput == null ? '' : String(formattedOutput),
                 isError: !!isError,
-                stardate: stardate
+                missionTime: missionTime
             };
 
             renderTerminalEntry(entry);
@@ -4992,18 +4993,18 @@
         // Tool Functions
         // =====================================================
         function testJsonProcessing() {
-            const testJson = '{"starship":"Enterprise","registry":"NCC-1701","crew":430,"warpCapable":true,"systems":["navigation","weapons","shields"]}';
+            const testJson = '{"platform":"aegis-command-grid","registry":"AGC-01","operators":430,"highAvailability":true,"systems":["orchestration","security","analytics"]}';
             executeCommand('format_json', { jsonString: testJson, indent: 2 });
         }
 
         async function refreshDashboard() {
             playBeep();
-            addTerminalLine('SYSTEM-REFRESH', 'Reloading all ship systems...');
+            addTerminalLine('SYSTEM-REFRESH', 'Reloading all platform systems...');
             
             try {
                 await checkServerStatus();
                 await loadSystemStats();
-                updateStardate();
+                updateMissionTime();
                 playSuccessSound();
                 addTerminalLine('SYSTEM-REFRESH', 'All systems nominal');
             } catch (error) {
@@ -6715,7 +6716,7 @@
 
         // ---- Activity Terminal ----
         const VIZ_MESSAGES = [
-            {type:'success', text:'Starfleet Command Interface online — 40 tools registered'},
+            {type:'success', text:'MCP Command Center Interface online — 40 tools registered'},
             {type:'info',    text:'MCP protocol handshake complete on stdio'},
             {type:'warn',    text:'GF_SECURITY_ADMIN_PASSWORD detected in git history'},
             {type:'success', text:'SSL certificate valid — 62 days remaining (*.google.com)'},
@@ -6859,9 +6860,9 @@
             // Initialize audio on first click
             document.body.addEventListener('click', () => initAudio(), { once: true });
             
-            // Start stardate clock
-            updateStardate();
-            setInterval(updateStardate, 1000);
+            // Start mission-time clock
+            updateMissionTime();
+            setInterval(updateMissionTime, 1000);
             
             // Initialize real-time analytics
             initializeAnalytics();
@@ -6886,7 +6887,7 @@
                 await loadSystemStats();
                 
                 setTimeout(() => {
-                    addTerminalLine('INITIALIZATION', 'STARFLEET COMMAND INTERFACE ONLINE');
+                    addTerminalLine('INITIALIZATION', 'MCP COMMAND CENTER INTERFACE ONLINE');
                     addTerminalLine('ANALYTICS', 'Real-time monitoring active - updating every second');
                     addTerminalLine('SHORTCUTS', 'Ctrl+R=Refresh | Ctrl+K=Clear | Ctrl+H=Health | Ctrl+T=Tools | Ctrl+`=Console | Esc=Hide');
                 }, 300);

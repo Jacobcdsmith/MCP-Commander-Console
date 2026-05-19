@@ -1,9 +1,9 @@
 /* ============================================
-   LCARS SHARED STYLES - Star Trek Interface
+   Command Center SHARED STYLES - cinematic sci-fi Interface
    ============================================ */
 
 :root {
-    /* LCARS Color Palette */
+    /* Command Center Color Palette */
     --lcars-blue: #5555ff;
     --lcars-orange: #ff9900;
     --lcars-red: #cc6666;
@@ -16,7 +16,7 @@
     --lcars-gray: #333366;
     --lcars-white: #ffffff;
     
-    /* Enterprise Accent Colors */
+    /* Accent Colors */
     --enterprise-gold: #ffd700;
     --enterprise-silver: #c0c0c0;
     --warp-core-blue: #00d4ff;
@@ -73,7 +73,7 @@ body::before {
     100% { transform: translateY(-100px); }
 }
 
-/* LCARS Container */
+/* Command Center Container */
 .lcars-container {
     width: 100%;
     min-height: 100vh;
@@ -83,7 +83,7 @@ body::before {
     margin: 0 auto;
 }
 
-/* LCARS Header */
+/* Command Center Header */
 .lcars-header {
     background: linear-gradient(45deg, var(--lcars-dark-blue) 0%, var(--lcars-blue) 100%);
     border: 2px solid var(--lcars-orange);
@@ -201,13 +201,13 @@ body::before {
     text-transform: uppercase;
 }
 
-.stardate {
+.mission-time {
     font-family: 'Orbitron', monospace;
     font-size: 0.85rem;
     color: var(--enterprise-silver);
 }
 
-/* LCARS Panel */
+/* Command Center Panel */
 .lcars-panel {
     background: linear-gradient(135deg, var(--lcars-gray) 0%, rgba(0,0,50,0.9) 100%);
     border: 3px solid var(--lcars-orange);
@@ -428,7 +428,7 @@ body::before {
     line-height: 1.4;
 }
 
-/* LCARS Button */
+/* Command Center Button */
 .lcars-btn {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;

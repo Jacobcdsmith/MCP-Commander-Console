@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARFLEET MCP Integration Console</title>
+    <title>MCP Command Center Integration Console</title>
+    <meta name="description" content="Integration console for MCP Command Center with direct access to MCP tools, output streams, and system operations.">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            /* LCARS Color Palette */
+            /* Command Center Color Palette */
             --lcars-blue: #5555ff;
             --lcars-orange: #ff9900;
             --lcars-red: #cc6666;
@@ -21,7 +22,7 @@
             --lcars-gray: #333366;
             --lcars-white: #ffffff;
             
-            /* Enterprise Colors */
+            /* Accent Colors */
             --enterprise-gold: #ffd700;
             --enterprise-silver: #c0c0c0;
             --warp-core-blue: #00d4ff;
@@ -1118,7 +1119,7 @@
                 name: 'Enhanced MCP Server (Local)',
                 transport: 'http',
                 url: 'http://localhost:3001',
-                description: 'Local enhanced MCP server with LCARS interface',
+                description: 'Local enhanced MCP server with operations interface',
                 status: 'online',
                 tools: []
             }

@@ -1,7 +1,7 @@
 <div align="center">
 
 
-![Starfleet Command — LCARS Bridge Interface](https://github.com/user-attachments/assets/f156b594-d3a3-451d-aa5e-33c2a72e97ce)
+![MCP Command Center — Operations Interface](https://github.com/user-attachments/assets/f156b594-d3a3-451d-aa5e-33c2a72e97ce)
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.17%2B-5555ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNFY3bC04IDR6Ii8+PC9zdmc+)](https://github.com/modelcontextprotocol/sdk)
@@ -9,8 +9,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](./DOCKER-README.md)
 [![License](https://img.shields.io/badge/License-ISC-ff9900?style=for-the-badge)](./package.json)
 
-**A production-ready Model Context Protocol server wrapped in a Star Trek LCARS command interface.**  
-*Stardate: active. All systems nominal.*
+**A production-ready Model Context Protocol platform with a cinematic operations interface.**  
+*Mission Time: active. All systems nominal.*
 
 </div>
 
@@ -19,9 +19,9 @@
 ## ◈ MISSION BRIEFING
 
 > *"The computer is the most democratic tool ever invented. Its purpose is to do whatever its user requests."*  
-> — *Starfleet Command Directive*
+> — *Platform Directive*
 
-**MCPStarfleetCommand** is an enhanced [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server with a fully interactive **LCARS-styled web dashboard** — the same aesthetic made famous by the starship *Enterprise*. It bridges Claude Code AI integration (via MCP stdio) with a beautiful browser-based command console, giving you developer tools, file-system ops, system monitoring, and Docker-scale observability from a single unified interface.
+**MCP Command Center** is an enhanced [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server with a fully interactive **operations web dashboard**. It bridges Claude Code AI integration (via MCP stdio) with a polished browser-based command console, giving you developer tools, file-system ops, system monitoring, and Docker-scale observability from a single unified interface.
 
 ---
 
@@ -43,7 +43,7 @@
 │   └─────────────────────────────────────────────────┘                      │
 │         │                                   │                              │
 │         ▼                                   ▼                              │
-│   [ AI responds with ]           [ LCARS Dashboard UI ]                    │
+│   [ AI responds with ]           [ Operations Dashboard UI ]                    │
 │     tool results                   Interactive terminal                    │
 │                                    System monitoring                       │
 │                                    One-click tool execution                │
@@ -63,7 +63,7 @@
 |---|---|
 | MCP stdio protocol | ✅ Active |
 | HTTP REST API | ✅ Active |
-| LCARS Web Dashboard | ✅ Online |
+| Operations Web Dashboard | ✅ Online |
 | Interactive terminal | ✅ Live |
 | Responsive design | ✅ All screens |
 
@@ -113,7 +113,7 @@ npm install
 npm start                # Production warp
 npm run dev              # Debug mode (verbose logs)
 
-# 3. Open LCARS console
+# 3. Open MCP Command Center
 open http://localhost:3001
 ```
 
@@ -124,7 +124,7 @@ open http://localhost:3001
 docker-compose up -d
 
 # Services come online:
-#   http://localhost:3001  ← MCP Server + LCARS Dashboard
+#   http://localhost:3001  ← MCP Server + Operations Dashboard
 #   http://localhost:3000  ← Grafana Analytics  (change default creds in .env!)
 #   http://localhost:3002  ← Real-time Analytics Engine
 #   http://localhost:9090  ← Prometheus Metrics
@@ -165,7 +165,7 @@ docker-compose down
 
 | Service | Port | Purpose |
 |---|---|---|
-| **MCP Server** | `:3001` | Core server · LCARS dashboard · REST API |
+| **MCP Server** | `:3001` | Core server · command center dashboard · REST API |
 | **Grafana** | `:3000` | Visual analytics · alerts · dashboards |
 | **Analytics** | `:3002` | Real-time event tracking |
 | **Prometheus** | `:9090` | Time-series metrics database |
@@ -175,11 +175,11 @@ docker-compose down
 
 ---
 
-## ◈ LCARS COMMAND CONSOLE — DASHBOARD PREVIEW
+## ◈ OPERATIONS CONSOLE — DASHBOARD PREVIEW
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║ ████ STARFLEET MCP ████████████████████████████████ 47.2 GHz ████║
+║ ████ MCP COMMAND CENTER ███████████████████████ 47.2 GHz ████║
 ╠════════════╦═══════════════════════════════════════════════════╣
 ║ NAV        ║  ┌──────────────────────────────────────────┐    ║
 ║ ▶ TERMINAL ║  │ > system_info                            │    ║
@@ -192,12 +192,12 @@ docker-compose down
 ╚════════════╩═══════════════════════════════════════════════════╝
 ```
 
-![Starfleet Command — Dashboard Preview](https://github.com/user-attachments/assets/4893c18a-5557-4a6c-8d1f-7e52ee97ec11)
+![MCP Command Center — Dashboard Preview](https://github.com/user-attachments/assets/4893c18a-5557-4a6c-8d1f-7e52ee97ec11)
 
 The dashboard features:
 - **⚡ Interactive Terminal** — Real-time command execution with color-coded output
 - **📡 System Monitoring** — Live CPU, memory, disk, and uptime gauges
-- **🗂️ Tool Panel** — Every MCP tool available as a one-click LCARS button
+- **🗂️ Tool Panel** — Every MCP tool available as a one-click command center control
 - **🔐 File Operations** — Read, write, browse files directly in browser
 - **📊 Git Integration** — Status, log, diff, branches at a glance
 
@@ -262,7 +262,7 @@ Copy `.env.example` → `.env` and adjust before launch.
 | Runtime | Node.js 18+ |
 | MCP Protocol | `@modelcontextprotocol/sdk` ^1.17 |
 | HTTP Server | Express.js 5.x |
-| Dashboard UI | Vanilla HTML · CSS (LCARS) · JS |
+| Dashboard UI | Vanilla HTML · CSS (Command Center theme) · JS |
 | Analytics | Custom metrics engine |
 | Monitoring | Prometheus + Grafana |
 | Cache | Redis |
@@ -291,7 +291,7 @@ npm run audit:fix    # Fix known vulnerabilities
 
 ```
 ╔═══════════════════════════════════════════════════════════╗
-║  ◈  STARFLEET MCP · ALL SYSTEMS NOMINAL · WARP READY  ◈  ║
+║  ◈  MCP COMMAND CENTER · ALL SYSTEMS NOMINAL · READY  ◈  ║
 ╚═══════════════════════════════════════════════════════════╝
 ```
 

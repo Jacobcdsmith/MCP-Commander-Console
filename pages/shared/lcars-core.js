@@ -1,5 +1,5 @@
 // ============================================
-// LCARS SHARED JAVASCRIPT - Core Functions
+// Command Center SHARED JAVASCRIPT - Core Functions
 // ============================================
 
 const API_BASE = window.location.origin;
@@ -50,9 +50,9 @@ function playErrorSound() {
 }
 
 // =====================================================
-// Stardate Calculator
+// Mission Time Calculator
 // =====================================================
-function generateStardate() {
+function generateMissionTime() {
     const now = new Date();
     const year = now.getFullYear();
     const start = new Date(year, 0, 0);
@@ -62,14 +62,14 @@ function generateStardate() {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     
-    const stardate = ((year - 2000) * 1000) + (dayOfYear * 2.74) + (hours / 24 * 2.74);
-    return stardate.toFixed(2);
+    const missionTime = ((year - 2000) * 1000) + (dayOfYear * 2.74) + (hours / 24 * 2.74);
+    return missionTime.toFixed(2);
 }
 
-function updateStardate() {
-    const el = document.getElementById('stardate');
+function updateMissionTime() {
+    const el = document.getElementById('mission-time');
     if (el) {
-        el.textContent = `STARDATE ${generateStardate()}`;
+        el.textContent = `MISSION TIME ${generateMissionTime()}`;
     }
 }
 
@@ -318,9 +318,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize audio on first click
     document.body.addEventListener('click', () => initAudio(), { once: true });
     
-    // Start stardate
-    updateStardate();
-    setInterval(updateStardate, 1000);
+    // Start mission-time clock
+    updateMissionTime();
+    setInterval(updateMissionTime, 1000);
     
     // Check server status
     checkServerStatus();

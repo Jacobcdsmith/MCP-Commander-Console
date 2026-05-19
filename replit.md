@@ -1,7 +1,7 @@
 # Enhanced MCP Server
 
 ## Overview
-An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (LCARS/Star Trek themed UI). Provides both an MCP protocol interface for AI model integration and an HTTP dashboard for manual interaction and monitoring.
+An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (Command Center/cinematic sci-fi themed UI). Provides both an MCP protocol interface for AI model integration and an HTTP dashboard for manual interaction and monitoring.
 
 ## Architecture
 - **Runtime**: Node.js v18.20.8, npm 10.8.2
@@ -11,7 +11,7 @@ An Enhanced Model Context Protocol (MCP) Server with a web-based dashboard (LCAR
 
 ## Project Layout
 - `server.js` — Main server (MCP protocol + Express HTTP dashboard)
-- `dashboard.html` — Main LCARS-styled dashboard UI (~6,700 lines)
+- `dashboard.html` — Main command-grid-styled dashboard UI (~6,700 lines)
 - `mcp-console.html` — MCP console interface
 - `pages/` — Additional static dashboard pages
 - `promo/` — Promotional landing page + 14 captured screenshots
@@ -114,10 +114,10 @@ PORT=5000 node server.js
 14. **Ship's Status** — Real-time system stats (platform, CPUs, memory, uptime, hostname)
 15. **Real-Time Analytics** *(full-width)* — Live CPU/memory charts (blended real + animated), gauges, heatmap, sparklines, activity feed from `/api/metrics` every 5s
 
-## Starfleet Boot Intro
-- Cinematic full-screen overlay (`#starfleet-intro`) on first DOM load
-- LCARS bars sweep in, side pillars rise, starfield + warp streaks fade in
-- Animated Starfleet delta emblem (SVG with gold gradient + glow)
+## MCP Command Center Boot Intro
+- Cinematic full-screen overlay (`#command-intro`) on first DOM load
+- Command Center bars sweep in, side pillars rise, starfield + warp streaks fade in
+- Animated MCP Command Center delta emblem (SVG with gold gradient + glow)
 - Boot log lines type out sequentially (subspace, warp, deflector, etc.)
 - Final flash + "ACCESS GRANTED · WELCOME, COMMANDER" pill
 - Dismissible via SPACE / ESC / click; auto-dismisses after ~5.3s
@@ -144,7 +144,7 @@ PORT=5000 node server.js
 - Staggered `.lcars-enter` fade-up animation on every panel via `--enter-delay`
   CSS var; above-the-fold panels cascade immediately, the rest fade in via
   IntersectionObserver as the user scrolls. Single-fire guard prevents
-  duplicate runs across `starfleet:ready` + DOMContentLoaded fallback.
+  duplicate runs across `commanddeck:ready` + DOMContentLoaded fallback.
 - Pointer ripple feedback on `.lcars-button`, `.lcars-btn`, `.nav-link`,
   `.lcars-control-btn`, `.back-btn`, `.tool-card`, and the MCP console
   buttons (`.add-server-btn`, `.server-btn`, `.modal-btn`, `.execute-btn`).
@@ -160,10 +160,10 @@ PORT=5000 node server.js
 ## Guided Tour (Tutorial)
 - "🎓 Tour" button in the nav bar (`#tourTrigger`) replays the tour anytime
 - Auto-launches once on first visit after the boot intro completes
-  (intro `dismiss()` dispatches a `starfleet:ready` CustomEvent)
+  (intro `dismiss()` dispatches a `commanddeck:ready` CustomEvent)
 - 7-step `TUTORIAL_STEPS` array: header, nav, tool panels, console pill,
-  stardate, tour button, finale
-- Animated spotlight ring + LCARS-themed tooltip card with progress dots
+  missionTime, tour button, finale
+- Animated spotlight ring + command-grid-themed tooltip card with progress dots
 - Card placement (top/right/bottom/left/center) auto-clamped to viewport
   with mobile fallback (`@media max-width: 720px` forces full-width card)
 - Spotlight target gets `position: relative; z-index: 99991` lift over the
@@ -183,7 +183,7 @@ PORT=5000 node server.js
 - **`/` is the landing page** — Visitors land on the animated promo/showcase
   page; the dashboard is one click away at `/dashboard` (alias `/bridge`).
   `?app=1` on `/` skips the landing and goes straight to the dashboard.
-- `promo/index.html` — Standalone animated LCARS landing/showcase page,
+- `promo/index.html` — Standalone animated Command Center landing/showcase page,
   also reachable at `/promo/` directly
 - `promo/promo-trailer.mp4` — 45-second auto-built product trailer (15
   scenes, 1920×1080 @ 30 fps, ~5MB). Embedded at the top of the promo page
@@ -193,7 +193,7 @@ PORT=5000 node server.js
   trailer from the screenshots with crossfade transitions. Run anytime
   the screenshots are refreshed.
 - `promo/og-card.jpg` — 1200×630 Open Graph social card for link previews.
-  Built from `promo/og.html` (a self-contained 1200×630 LCARS card) via a
+  Built from `promo/og.html` (a self-contained 1200×630 Command Center card) via a
   screenshot + ffmpeg crop. Referenced from `og:image`, `og:image:width`,
   `og:image:height`, `twitter:card=summary_large_image`, and `twitter:image`
   meta tags in `promo/index.html`.

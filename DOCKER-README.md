@@ -88,7 +88,7 @@ This Docker hub provides a complete, scalable infrastructure:
 ### MCP Server (Port 3001)
 Your main Enhanced MCP Server with:
 - 13 powerful tools (Git, File System, System, Data Processing)
-- Beautiful LCARS-themed dashboard
+- Beautiful command-grid-themed dashboard
 - HTTP API endpoints
 - MCP protocol support via stdio
 
