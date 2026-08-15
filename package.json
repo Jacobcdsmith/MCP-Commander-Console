@@ -1,9 +1,12 @@
 {
-  "name": "enhanced-mcp-server",
+  "name": "mcp-commander-console",
   "version": "1.0.0",
-  "description": "A comprehensive MCP server with developer tools, system operations, and data processing capabilities",
+  "description": "Production-ready MCP server with a cinematic ops dashboard — dual-interface (stdio + HTTP), 13 dev/system tools, Docker-scale observability with Grafana & Prometheus.",
   "main": "server.js",
   "type": "module",
+  "bin": {
+    "mcp-commander-console": "./bin/mcp-commander-console.js"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "DEBUG=1 node server.js",
@@ -20,13 +23,32 @@
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "server",
     "tools",
     "development",
-    "automation"
+    "automation",
+    "dashboard",
+    "cli",
+    "stdio",
+    "http",
+    "grafana",
+    "prometheus",
+    "docker",
+    "observability",
+    "command-center",
+    "mcp-server"
   ],
-  "author": "",
+  "author": "Jacob Smith <jacobcsmithd@gmail.com>",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console.git"
+  },
+  "homepage": "https://github.com/Jacobcdsmith/MCP-Commander-Console#readme",
+  "bugs": {
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console/issues"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
     "@modelcontextprotocol/sdk": "^1.17.2",
@@ -45,5 +67,39 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "files": [
+    "server.js",
+    "server-analytics-integration.js",
+    "bin/",
+    "dashboard.html",
+    "mcp-console.html",
+    "pages/",
+    "promo/",
+    "docker-compose.yml",
+    "docker-compose.dev.yml",
+    "docker-compose.prod.yml",
+    "Dockerfile",
+    "nginx/",
+    "prometheus/",
+    "grafana/",
+    "redis.conf",
+    "LICENSE",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CHEATSHEET.md",
+    "DOCKER-README.md",
+    "DEPLOYMENT-SUMMARY.md",
+    "QUICKSTART.md",
+    "IDE_SETUP.md",
+    "Makefile",
+    ".env.example",
+    ".dockerignore",
+    ".editorconfig",
+    ".eslintrc.json",
+    ".eslintignore",
+    ".prettierrc",
+    ".prettierignore",
+    ".gitignore"
+  ]
 }

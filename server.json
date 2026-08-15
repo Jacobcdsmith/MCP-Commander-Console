@@ -1,0 +1,244 @@
+{
+  "name": "io.github.jacobcdsmith/mcp-commander-console",
+  "version": "1.0.0",
+  "description": "Production-ready MCP server with a cinematic ops dashboard — dual-interface (stdio + HTTP), 13 dev/system tools, Docker-scale observability with Grafana & Prometheus.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console.git"
+  },
+  "homepage": "https://github.com/Jacobcdsmith/MCP-Commander-Console#readme",
+  "bugs": {
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console/issues"
+  },
+  "license": "ISC",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "server",
+    "tools",
+    "development",
+    "automation",
+    "dashboard",
+    "cli",
+    "stdio",
+    "http",
+    "grafana",
+    "prometheus",
+    "docker",
+    "observability",
+    "command-center",
+    "mcp-server"
+  ],
+  "author": {
+    "name": "Jacob Smith",
+    "email": "jacobcsmithd@gmail.com",
+    "url": "https://github.com/Jacobcdsmith"
+  },
+  "bin": {
+    "mcp-commander-console": "./bin/mcp-commander-console.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "DEBUG=1 node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "server.js",
+    "server-analytics-integration.js",
+    "bin/",
+    "dashboard.html",
+    "mcp-console.html",
+    "pages/",
+    "promo/",
+    "docker-compose.yml",
+    "docker-compose.dev.yml",
+    "docker-compose.prod.yml",
+    "Dockerfile",
+    "nginx/",
+    "prometheus/",
+    "grafana/",
+    "redis.conf",
+    "LICENSE",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CHEATSHEET.md",
+    "DOCKER-README.md",
+    "DEPLOYMENT-SUMMARY.md",
+    "QUICKSTART.md",
+    "IDE_SETUP.md",
+    "Makefile"
+  ],
+  "mcp": {
+    "name": "mcp-commander-console",
+    "transport": "stdio",
+    "tools": [
+      {
+        "name": "git_status",
+        "description": "Show git repository status with porcelain output"
+      },
+      {
+        "name": "git_log",
+        "description": "Show git commit history (last N commits)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "number",
+              "description": "Number of commits to show (default: 10)",
+              "default": 10
+            }
+          }
+        }
+      },
+      {
+        "name": "git_diff",
+        "description": "Show git diff for files",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "description": "Specific file to diff (optional)"
+            }
+          }
+        }
+      },
+      {
+        "name": "git_branch",
+        "description": "List all git branches"
+      },
+      {
+        "name": "search_files",
+        "description": "Recursively search for files matching a query",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search query (regex supported)"
+            },
+            "searchDir": {
+              "type": "string",
+              "description": "Directory to search in (default: current directory)",
+              "default": "."
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      {
+        "name": "list_files",
+        "description": "List files in a directory",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "dir": {
+              "type": "string",
+              "description": "Directory to list (default: current directory)",
+              "default": "."
+            }
+          }
+        }
+      },
+      {
+        "name": "read_file",
+        "description": "Read file contents",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "filePath": {
+              "type": "string",
+              "description": "Path to file to read"
+            }
+          },
+          "required": ["filePath"]
+        }
+      },
+      {
+        "name": "write_file",
+        "description": "Write content to a file",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "filePath": {
+              "type": "string",
+              "description": "Path to file to write"
+            },
+            "content": {
+              "type": "string",
+              "description": "Content to write"
+            }
+          },
+          "required": ["filePath", "content"]
+        }
+      },
+      {
+        "name": "create_directory",
+        "description": "Create a directory",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "dirPath": {
+              "type": "string",
+              "description": "Path of directory to create"
+            }
+          },
+          "required": ["dirPath"]
+        }
+      },
+      {
+        "name": "run_command",
+        "description": "Execute a shell command",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "Command to execute"
+            },
+            "cwd": {
+              "type": "string",
+              "description": "Working directory (default: current directory)",
+              "default": "."
+            }
+          },
+          "required": ["command"]
+        }
+      },
+      {
+        "name": "system_info",
+        "description": "Get live system metrics (CPU, memory, disk, uptime)"
+      },
+      {
+        "name": "parse_json",
+        "description": "Parse and validate JSON",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "jsonString": {
+              "type": "string",
+              "description": "JSON string to parse"
+            }
+          },
+          "required": ["jsonString"]
+        }
+      },
+      {
+        "name": "format_json",
+        "description": "Pretty-print JSON",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "jsonString": {
+              "type": "string",
+              "description": "JSON string to format"
+            }
+          },
+          "required": ["jsonString"]
+        }
+      }
+    ]
+  }
+}
