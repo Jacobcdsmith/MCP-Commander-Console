@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.jacobcdsmith/mcp-commander-console",
+  "description": "Production-ready MCP server with a cinematic ops dashboard — dual-interface (stdio + HTTP), 13 dev/system tools, Docker-scale observability with Grafana & Prometheus.",
+  "repository": {
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "mcp-commander-console",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "npx"
+    }
+  ]
+}

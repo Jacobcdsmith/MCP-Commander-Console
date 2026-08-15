@@ -1,9 +1,37 @@
 {
-  "name": "enhanced-mcp-server",
+  "name": "mcp-commander-console",
   "version": "1.0.0",
-  "description": "A comprehensive MCP server with developer tools, system operations, and data processing capabilities",
+  "description": "Production-ready MCP server with a cinematic ops dashboard — dual-interface (stdio + HTTP), 13 dev/system tools, Docker-scale observability with Grafana & Prometheus.",
   "main": "server.js",
   "type": "module",
+  "bin": {
+    "mcp-commander-console": "bin/mcp-commander-console.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jacobcdsmith/MCP-Commander-Console.git"
+  },
+  "homepage": "https://github.com/Jacobcdsmith/MCP-Commander-Console#readme",
+  "bugs": {
+    "url": "https://github.com/Jacobcdsmith/MCP-Commander-Console/issues"
+  },
+  "author": {
+    "name": "Jacobcdsmith",
+    "url": "https://github.com/Jacobcdsmith"
+  },
+  "files": [
+    "server.js",
+    "bin",
+    "dashboard.html",
+    "mcp-console.html",
+    "pages",
+    "promo/index.html",
+    "promo/og-card.jpg",
+    "promo/promo-trailer.mp4",
+    "promo/screenshots",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "start": "node server.js",
     "dev": "DEBUG=1 node server.js",
@@ -20,12 +48,21 @@
   },
   "keywords": [
     "mcp",
-    "server",
-    "tools",
-    "development",
-    "automation"
+    "model-context-protocol",
+    "mcp-server",
+    "claude",
+    "ai-agent",
+    "dev-tools",
+    "devtools",
+    "system-monitoring",
+    "dashboard",
+    "docker",
+    "observability",
+    "grafana",
+    "prometheus",
+    "automation",
+    "cli"
   ],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
