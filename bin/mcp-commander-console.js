@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { fileURLToPath } from 'url';
-import { dirname, join, resolve } from 'path';
+import { dirname, resolve } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Import and run the main server using proper file:// URL on Windows
+// Import and run the main server - resolve relative to the installed package location
 const serverPath = resolve(__dirname, '..', 'server.js');
-const serverUrl = new URL(`file://${serverPath.replace(/\\/g, '/')}`).href;
-import(serverUrl);
+import(`file://${serverPath.replace(/\\/g, '/')}`);
