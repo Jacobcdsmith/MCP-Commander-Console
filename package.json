@@ -1,6 +1,6 @@
 {
   "name": "mcp-commander-console",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Production-ready MCP server with a cinematic ops dashboard — dual-interface (stdio + HTTP), 13 dev/system tools, Docker-scale observability with Grafana & Prometheus.",
   "main": "server.js",
   "type": "module",
